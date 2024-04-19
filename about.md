@@ -4,15 +4,5 @@ title: About
 permalink: /about/
 ---
 
-This is the base Jekyll theme. You can find out more info about customizing your Jekyll theme, as well as basic Jekyll usage documentation at [jekyllrb.com](https://jekyllrb.com/)
+This is an informal page for the Home Server Group (you know who you are - if you're not in the group, you're probably not reading this).   The purpose is to collect notes, documentation, instructions related to the topics discussed in the group meetings.   If you want to make an edit, submit a pull request to [the source repo](https://github.com/homeservernotes/homeservernotes.info)
 
-You can find the source code for Minima at GitHub:
-[jekyll][jekyll-organization] /
-[minima](https://github.com/jekyll/minima)
-
-You can find the source code for Jekyll at GitHub:
-[jekyll][jekyll-organization] /
-[jekyll](https://github.com/jekyll/jekyll)
-
-
-[jekyll-organization]: https://github.com/jekyll
