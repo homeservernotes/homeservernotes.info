@@ -3,7 +3,7 @@ layout: post
 title: "How to Contribute to This Site"
 date: 2024-04-22 22:19:43 +0000
 published: true
-# github_comments_issueid: "create an issue and specfiy the issue id here"
+github_comments_issueid: "6"
 tags:
 ---
 
@@ -41,7 +41,7 @@ Refresh the browser window to see the new page:
 
 
 ------------------
-Use vim to edit the new page ( find it in the _posts subdirectory ):
+Use vim (or any other editor) to edit the new page. Find it in the _posts subdirectory. Vim is available in the podman container but the file should also be accessible on your hard drive independent of podman if you want to use a different editor installed on your computer. :
 ![image tooltip here](/assets/2024-04-22--contributing/Screenshot from 2024-04-22 15-21-38.png)
 
 ------------------
