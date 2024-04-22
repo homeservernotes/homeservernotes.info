@@ -16,4 +16,5 @@ RUN bundle install
 
 RUN git config --global --add safe.directory /site
 
+WORKDIR /site
 CMD ["./serve.bash"]
