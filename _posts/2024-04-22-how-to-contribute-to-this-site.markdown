@@ -41,7 +41,7 @@ Refresh the browser window to see the new page:
 
 
 ------------------
-Use vim (or any other editor) to edit the new page. Find it in the _posts subdirectory. Vim is available in the podman container but the file should also be accessible on your hard drive independent of podman if you want to use a different editor installed on your computer. :
+The contents of the new page are specified in a [markdown](https://www.markdownguide.org/tools/jekyll/)  file. Use vim (or any other editor) to edit the new page. Find it in the _posts subdirectory. Vim is available in the podman container but the file should also be accessible on your hard drive independent of podman if you want to use a different editor installed on your computer. :
 ![image tooltip here](/assets/2024-04-22--contributing/Screenshot from 2024-04-22 15-21-38.png)
 
 ------------------
