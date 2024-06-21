@@ -1,0 +1,320 @@
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.3">Jekyll</generator><link href="/feed.xml" rel="self" type="application/atom+xml" /><link href="/" rel="alternate" type="text/html" /><updated>2024-06-21T17:23:18+00:00</updated><id>/feed.xml</id><title type="html">Home Server Group</title><entry><title type="html">Meeting on June 20</title><link href="/2024/06/21/meeting-on-june-20.html" rel="alternate" type="text/html" title="Meeting on June 20" /><published>2024-06-21T12:16:40+00:00</published><updated>2024-06-21T12:16:40+00:00</updated><id>/2024/06/21/meeting-on-june-20</id><content type="html" xml:base="/2024/06/21/meeting-on-june-20.html"><![CDATA[<h2 id="overview">Overview</h2>
+<p>The group met on zoom.  Five people attended.</p>
+
+<h2 id="topics">Topics</h2>
+<ul>
+  <li>
+    <p>Comparison of proxmox and yunohost</p>
+  </li>
+  <li>
+    <p>Discussion of <a href="https://traefik.io">traefik</a> and reverse proxies in general.   A reverse proxy runs on a server and directs incoming traffic (ingress) to the appropriate service according to the URL used to reach the reverse proxy.</p>
+  </li>
+  <li>
+    <p>The docker image for the <a href="https://github.com/dmbrownlee/demo-proxmox-terraform">proxmox/terraform demo</a> has been updated.</p>
+  </li>
+  <li>
+    <p>We talked about the current status of the windows/truenas permissions problem that we discussed last week.   These have been mostly resolved.</p>
+  </li>
+  <li>
+    <p>A participant gave an overview of what <a href="https://www.ansible.com/">ansible</a> is and how to use it.  Ansible is a configuration manager that (typically) runs on a computer other than the one being configured.   Ansible uses ssh to run python on the target machine and configure as needed.</p>
+  </li>
+</ul>]]></content><author><name></name></author><summary type="html"><![CDATA[Overview The group met on zoom. Five people attended.]]></summary></entry><entry><title type="html">Meeting on June 6</title><link href="/2024/06/07/meeting-on-june-6.html" rel="alternate" type="text/html" title="Meeting on June 6" /><published>2024-06-07T20:29:26+00:00</published><updated>2024-06-07T20:29:26+00:00</updated><id>/2024/06/07/meeting-on-june-6</id><content type="html" xml:base="/2024/06/07/meeting-on-june-6.html"><![CDATA[<h2 id="overview">Overview</h2>
+<p>The group met on zoom.  Ten people attended.</p>
+
+<h2 id="topics">Topics</h2>
+<ul>
+  <li>One of the participants was unable to access some files on a truenas server from a Windows machine.   The meeting started out with a discussion about what might be causing these access problems.</li>
+  <li>We eventually diagnosed the problem as a Windows permissions problem perhaps caused by the files in question being created by one user and then accessed by a different user.</li>
+  <li>The solution that we arrived at was to use Windows to recursively change the file permissions to allow access.</li>
+  <li>The fix worked but is not perfect.   Ideally the permissions used to read and write the files should work without any changes after the fact.</li>
+  <li>This concern led to a discussion about differences between Linux and Windows file permissions, owner/group/other (on Linux), Access Control List’s (aka ACL’s) on Windows, ACL’s on Linux(!), ACL’s on Samba, etc.</li>
+</ul>]]></content><author><name></name></author><summary type="html"><![CDATA[Overview The group met on zoom. Ten people attended.]]></summary></entry><entry><title type="html">Meeting on May 16</title><link href="/2024/05/17/meeting-on-may-16.html" rel="alternate" type="text/html" title="Meeting on May 16" /><published>2024-05-17T16:27:29+00:00</published><updated>2024-05-17T16:27:29+00:00</updated><id>/2024/05/17/meeting-on-may-16</id><content type="html" xml:base="/2024/05/17/meeting-on-may-16.html"><![CDATA[<h2 id="overview">Overview</h2>
+<p>The group met on zoom.  Five people attended.</p>
+
+<h2 id="main-topics">Main Topics</h2>
+<p>We started with a discussion of the group’s mission.   A few ideas regarding a product were tossed around including creating an iso and/or a configuring/distributing a lightweight computer.</p>
+
+<h2 id="other-topics">Other Topics</h2>
+
+<ul>
+  <li>e-mail backend options: <a href="https://www.dovecot.org/">dovecot</a>, <a href="https://www.proofpoint.com/us/products/email-protection/open-source-email-solution">sendmail</a>, <a href="https://www.postfix.org/">postfix</a></li>
+  <li>encryption tools: <a href="https://gnupg.org/">gpg</a> / <a href="https://age-encryption.org/">age</a></li>
+  <li>git and git front ends: <a href="https://git-scm.com/">git</a>/<a href="https://github.com">github</a>/<a href="https://about.gitea.com/">gitea</a></li>
+  <li>web site building and publishing : <a href="https://jekyllrb.com/">jekyll</a>/<a href="https://pages.github.com/">github pages</a></li>
+  <li>rss: <a href="https://feedbin.com/help">feedbin</a>/<a href="https://codemadness.org/sfeed-simple-feed-parser.html">sfeed</a></li>
+  <li>vpn/remote access: <a href="https://www.wireguard.com/">wireguard</a>/<a href="https://tailscale.com/">tailscale</a>/<a href="https://github.com/juanfont/headscale">headscale</a>/domain name registration/static ip/dynamic dns</li>
+</ul>
+
+<h2 id="future-plans">Future Plans</h2>
+
+<ul>
+  <li>Presentation on rss (probably at a <a href="https://belug.us">belug</a> meeting)</li>
+  <li>Presentation on generating content with jekyll and publishing content with github/pages (two separate topics that go well together)</li>
+</ul>]]></content><author><name></name></author><summary type="html"><![CDATA[Overview The group met on zoom. Five people attended.]]></summary></entry><entry><title type="html">Unreliable dhcp when running VM in proxmox in VirtualBox</title><link href="/2024/05/09/unreliable-dhcp-when-running-vm-in-proxmox-in-virtualbox.html" rel="alternate" type="text/html" title="Unreliable dhcp when running VM in proxmox in VirtualBox" /><published>2024-05-09T21:43:24+00:00</published><updated>2024-05-09T21:43:24+00:00</updated><id>/2024/05/09/unreliable-dhcp-when-running-vm-in-proxmox-in-virtualbox</id><content type="html" xml:base="/2024/05/09/unreliable-dhcp-when-running-vm-in-proxmox-in-virtualbox.html"><![CDATA[<p>I’ve been trying to put together a “proxmox in VirtualBox” environment that I can run on my laptop to experiment with.   By and large this has gone OK but I’ve run into one problem that I have not been able to resolve.   Specifically, a VM created in this proxmox environment does not get allocated a new ip address by the VirtualBox dhcp server.   I can work around this by manually assigning an IP address but my hope was to use this environment to test out this <a href="https://github.com/dmbrownlee/demo-proxmox-terraform">automated setup system</a> which expects dhcp to work.</p>
+
+<p>I posted a <a href="https://forum.proxmox.com/threads/dhcp-fails-in-linuxmint-vm-in-proxmox-in-virtualbox-on-ubuntu-22-04.146680/">question on the proxmox forum</a> about this but so far nobody has responded.</p>
+
+<p>At this point I regard the proxmox on Virtualbox environment to be unreliable so I’ll probably switch to using a real computer for proxmox.</p>
+
+<p>If anyone reading this knows what the problem is (or might be) please let me know in the comments.</p>]]></content><author><name></name></author><summary type="html"><![CDATA[I’ve been trying to put together a “proxmox in VirtualBox” environment that I can run on my laptop to experiment with. By and large this has gone OK but I’ve run into one problem that I have not been able to resolve. Specifically, a VM created in this proxmox environment does not get allocated a new ip address by the VirtualBox dhcp server. I can work around this by manually assigning an IP address but my hope was to use this environment to test out this automated setup system which expects dhcp to work.]]></summary></entry><entry><title type="html">Video walk-through: Setting up PXE services on TrueNAS</title><link href="/2024/05/04/video-walk-through-setting-up-pxe-services-on-truenas.html" rel="alternate" type="text/html" title="Video walk-through: Setting up PXE services on TrueNAS" /><published>2024-05-04T18:29:13+00:00</published><updated>2024-05-04T18:29:13+00:00</updated><id>/2024/05/04/video-walk-through--setting-up-pxe-services-on-truenas</id><content type="html" xml:base="/2024/05/04/video-walk-through-setting-up-pxe-services-on-truenas.html"><![CDATA[<p>Setting up a network boot server makes reinstallation easy and, since you may have many boot files to serve up including installation ISO images, storing the files on your NAS and hosting the PXE services from there makes sense.  The netboot.xyz helm chart is a simple install on TrueNAS and the only other step is to configure your DHCP server to hand out the boot server and filename in DHCP responses (adding two lines in our VyOS config).</p>
+
+<p>Although it is simple to get up and running, <a href="https://rumble.com/v4t59be-setting-up-netboot.xyz-service-on-truenas-scale.html">this walkthrough video</a> highlights a few pitfalls, the file locations behind the scenes, using dhcpdump for debugging, and customizing the boot menus to boot files from your local NAS rather than across the internet (faster).  For fun, the demonstration shows you how you can use this to network install your Proxmox nodes which, since this is a virtual lab, results in running virutal Proxmox in Proxmox.  All that, and it is still less than an hour.</p>
+
+<p>–</p>]]></content><author><name></name></author><summary type="html"><![CDATA[Setting up a network boot server makes reinstallation easy and, since you may have many boot files to serve up including installation ISO images, storing the files on your NAS and hosting the PXE services from there makes sense. The netboot.xyz helm chart is a simple install on TrueNAS and the only other step is to configure your DHCP server to hand out the boot server and filename in DHCP responses (adding two lines in our VyOS config).]]></summary></entry><entry><title type="html">Meeting on May 2</title><link href="/2024/05/03/meeting-on-may-2.html" rel="alternate" type="text/html" title="Meeting on May 2" /><published>2024-05-03T19:34:58+00:00</published><updated>2024-05-03T19:34:58+00:00</updated><id>/2024/05/03/meeting-on-may-2</id><content type="html" xml:base="/2024/05/03/meeting-on-may-2.html"><![CDATA[<p>The group met on zoom yesterday evening.  Seven people attended.</p>
+
+<hr />
+
+<p>We started off with brief discussions of</p>
+<ul>
+  <li><a href="https://github.com/aceberg/WatchYourLAN">Watch Your Lan</a>, a “Lightweight network IP scanner with web GUI” (available as a <a href="https://tteck.github.io/Proxmox/">tteck</a> monitoring package)</li>
+  <li><a href="https://www.drawio.com/">draw.io</a>, “a diagramming or whiteboarding application”</li>
+  <li><a href="https://linuxfestnorthwest.org/">Linux Fest Northwest</a></li>
+  <li><a href="https://homeservernotes.info/2024/04/21/installing-proxmox-on-virtualbox.html">proxmox running under virtualbox</a></li>
+  <li>Different virtualization options (<a href="https://virt-manager.org/">VirtManager</a>, <a href="https://help.gnome.org/users/gnome-boxes/stable/">GnomeBoxes</a>)</li>
+</ul>
+
+<hr />
+<p>The major meeting topic was a <a href="https://www.truenas.com/">truenas</a> lab that showcased the use of <a href="https://www.terraform.io/">terraform</a> for virtual machine configuration within proxmox.  The lab is demonstrated in <a href="https://rumble.com/v4sq2sl-demo-project-update-2024-05-01.html">this video</a>. Some preliminary context that may be necessary can be found in <a href="https://rumble.com/v4kkjol-demo-project-update-2024-03-21.html">this video</a> . This Use of terraform is facilitated by the <a href="https://registry.terraform.io/providers/bpg/proxmox/latest">bpg proxmox plugin</a>.   As part of this topic we discussed pros and cons of using ssh to access a truenas server ( a potential security problem in general ).   We also discussed the existence of truenas plugin modules; in particular modules that enable <a href="https://netboot.xyz/">netboot</a> and <a href="https://nextcloud.com/">nextcloud</a> functionality.</p>
+
+<hr />
+<p>We wrapped up with a discussion of the group’s mission.   Some members emphasised the need for simplicity in whatever we end up creating.   We considered the advantages and disadvantages of using proxmox or yunohost as a basis for work.   We discussed what applications/services should be included in a baseline product.</p>]]></content><author><name></name></author><summary type="html"><![CDATA[The group met on zoom yesterday evening. Seven people attended.]]></summary></entry><entry><title type="html">Creating a virtual machine in Proxmox in Virtualbox</title><link href="/2024/04/27/creating-a-virtual-machine-in-proxmox-in-virtualbox.html" rel="alternate" type="text/html" title="Creating a virtual machine in Proxmox in Virtualbox" /><published>2024-04-27T19:39:24+00:00</published><updated>2024-04-27T19:39:24+00:00</updated><id>/2024/04/27/creating-a-virtual-machine-in-proxmox-in-virtualbox</id><content type="html" xml:base="/2024/04/27/creating-a-virtual-machine-in-proxmox-in-virtualbox.html"><![CDATA[<p>This post describes the process that I went through to get a virtual machine running in a Proxmox instance running under Virtualbox.  My guess is that not all the steps shown here are optimal or even necessary but I’m leaving them all in just in case.</p>
+
+<hr />
+
+<p>The first thing that I should mention is that the only version of Proxmox that I was able to get this to work with is Proxmox 8.1-1.   With newer versions of Proxmox I would get “Guru Mediation” messages (basically a Proxmox crash) when booting from all the Linux ISO’s that I tried.   This happened with Proxmox 8.1-2 and Proxmox 8.2-1.    Proxmox 8.1-1 is no longer available for download from the Proxmox site but <a href="https://www.dropbox.com/scl/fi/cbvdqo0vb138dqtr1jwu4/proxmox-ve_8.1-1.iso?rlkey=crvhod61ez88cekuygj7ksjre&amp;st=8w61lmxw&amp;dl=0">here is a link to a Proxmox 8.1-1 iso file that I uploaded</a>.</p>
+
+<hr />
+<p>After installing Proxmox 8.1-1 in virtual box, create a NAT network with default settings:
+<img src="/assets/2024-04-27--virtual-machine-in-proxmox-in-virtualbox/Screenshot from 2024-04-27 14-15-14.png" alt="image tooltip here" /></p>
+
+<hr />
+<p>Use the “Create VM” button to create a new virtual machine:
+<img src="/assets/2024-04-27--virtual-machine-in-proxmox-in-virtualbox/Screenshot from 2024-04-27 14-20-08.png" alt="image tooltip here" /></p>
+
+<hr />
+<p>Use the wizard to configure the machine.
+<img src="/assets/2024-04-27--virtual-machine-in-proxmox-in-virtualbox/Screenshot from 2024-04-27 14-20-18.png" alt="image tooltip here" /></p>
+
+<hr />
+<p>Specify an ISO image to boot from (linuxmint used here).    You will need to first upload this to your Proxmox server (forgot to take a picture of the upload).
+<img src="/assets/2024-04-27--virtual-machine-in-proxmox-in-virtualbox/Screenshot from 2024-04-27 14-20-32.png" alt="image tooltip here" /></p>
+
+<hr />
+<p>I set memory to 4096 and defaults for everything else.  Press “Start Now” to boot.
+<img src="/assets/2024-04-27--virtual-machine-in-proxmox-in-virtualbox/Screenshot from 2024-04-27 14-22-28.png" alt="image tooltip here" /></p>
+
+<hr />
+<p>Off we go:
+<img src="/assets/2024-04-27--virtual-machine-in-proxmox-in-virtualbox/Screenshot from 2024-04-27 14-23-15.png" alt="image tooltip here" /></p>
+
+<hr />
+<p>Double click the CD icon to do an install:
+<img src="/assets/2024-04-27--virtual-machine-in-proxmox-in-virtualbox/Screenshot from 2024-04-27 14-25-56.png" alt="image tooltip here" /></p>
+
+<hr />
+<p>Go through the install process.  Pretty much all default values except for timezone.
+<img src="/assets/2024-04-27--virtual-machine-in-proxmox-in-virtualbox/Screenshot from 2024-04-27 14-29-00.png" alt="image tooltip here" /></p>
+
+<hr />
+<p>Restart after “Installation has finished”
+<img src="/assets/2024-04-27--virtual-machine-in-proxmox-in-virtualbox/Screenshot from 2024-04-27 14-42-27.png" alt="image tooltip here" /></p>
+
+<hr />
+<p>We have no internet connection:
+<img src="/assets/2024-04-27--virtual-machine-in-proxmox-in-virtualbox/Screenshot from 2024-04-27 14-46-06.png" alt="image tooltip here" /></p>
+
+<hr />
+<p>So edit connections (right click on the little circle):
+<img src="/assets/2024-04-27--virtual-machine-in-proxmox-in-virtualbox/Screenshot from 2024-04-27 14-46-19.png" alt="image tooltip here" /></p>
+
+<hr />
+<p>Add a connection:
+<img src="/assets/2024-04-27--virtual-machine-in-proxmox-in-virtualbox/Screenshot from 2024-04-27 14-46-36.png" alt="image tooltip here" /></p>
+
+<hr />
+<p>Make up an address ( I chose 26 on the the 10.0.2.X network ). The rest is determined by the network (but still needs to be entered).
+<img src="/assets/2024-04-27--virtual-machine-in-proxmox-in-virtualbox/Screenshot from 2024-04-27 14-47-07.png" alt="image tooltip here" /></p>
+
+<hr />
+<p>Don’t forget (like I did) to change “Method” to “Manual” .
+<img src="/assets/2024-04-27--virtual-machine-in-proxmox-in-virtualbox/Screenshot from 2024-04-27 14-47-39.png" alt="image tooltip here" /></p>
+
+<hr />
+<p>The internet is reachable but DNS is not working yet.
+<img src="/assets/2024-04-27--virtual-machine-in-proxmox-in-virtualbox/Screenshot from 2024-04-27 14-49-12.png" alt="image tooltip here" /></p>
+
+<hr />
+<p>Specify DNS server 8.8.8.8 (public DNS server provided by Google):
+<img src="/assets/2024-04-27--virtual-machine-in-proxmox-in-virtualbox/Screenshot from 2024-04-27 14-49-41.png" alt="image tooltip here" /></p>
+
+<hr />
+<p>Still can’t ping yahoo.com:
+<img src="/assets/2024-04-27--virtual-machine-in-proxmox-in-virtualbox/Screenshot from 2024-04-27 14-50-04.png" alt="image tooltip here" /></p>
+
+<hr />
+<p>Works after a reboot:
+<img src="/assets/2024-04-27--virtual-machine-in-proxmox-in-virtualbox/Screenshot from 2024-04-27 14-52-09.png" alt="image tooltip here" /></p>
+
+<hr />
+<p>After creating a single VM, subsequent VM creations connected to the internet without the connection editing needed by the first one .   I don’t know why.   So, if you are doing some kind of automated management of a Proxmox in Virtualbox, you might consider creating a single VM by hand before starting the process.</p>]]></content><author><name></name></author><summary type="html"><![CDATA[This post describes the process that I went through to get a virtual machine running in a Proxmox instance running under Virtualbox. My guess is that not all the steps shown here are optimal or even necessary but I’m leaving them all in just in case.]]></summary></entry><entry><title type="html">Creating a container in Proxmox in Virtualbox</title><link href="/2024/04/25/creating-a-container-in-proxmox-in-virtualbox.html" rel="alternate" type="text/html" title="Creating a container in Proxmox in Virtualbox" /><published>2024-04-25T21:58:04+00:00</published><updated>2024-04-25T21:58:04+00:00</updated><id>/2024/04/25/creating-a-container-in-proxmox-in-virtualbox</id><content type="html" xml:base="/2024/04/25/creating-a-container-in-proxmox-in-virtualbox.html"><![CDATA[<p>This post will show how to use the web browser interface to create a container in a Proxmox host running under Virtualbox.    In Virtualbox, the network failed to initialize with the default DNS server.   Using a publicly available DNS server (such as 8.8.8.8) avoided this.</p>
+
+<hr />
+
+<p>First, log in to the browser based gui.</p>
+
+<hr />
+<p>To download a container template, select “local” from the menu on the left, “CT Templates” from the next menu, and click on the “Templates” button (shown highlighted in blue outline):</p>
+
+<p><img src="/assets/2024-04-25--container-in-proxmox-in-virtualbox/Screenshot from 2024-04-25 15-29-06.png" alt="image tooltip here" /></p>
+
+<hr />
+<p>Choose a template to use for your container - I used “ubuntu-22.04-standard”.</p>
+
+<p><img src="/assets/2024-04-25--container-in-proxmox-in-virtualbox/Screenshot from 2024-04-25 15-29-27.png" alt="image tooltip here" /></p>
+
+<hr />
+<p>Watch it download.</p>
+
+<p><img src="/assets/2024-04-25--container-in-proxmox-in-virtualbox/Screenshot from 2024-04-25 15-29-51.png" alt="image tooltip here" /></p>
+
+<hr />
+<p>Click on the “Create CT” button.  Up pops a “Create LXC Container” wizard.  Choose a password.</p>
+
+<p><img src="/assets/2024-04-25--container-in-proxmox-in-virtualbox/Screenshot from 2024-04-25 15-30-35.png" alt="image tooltip here" /></p>
+
+<hr />
+<p>Use the container template downloaded earlier.</p>
+
+<p><img src="/assets/2024-04-25--container-in-proxmox-in-virtualbox/Screenshot from 2024-04-25 15-30-44.png" alt="image tooltip here" /></p>
+
+<hr />
+<p>For IPv4 choose DHCP.</p>
+
+<p><img src="/assets/2024-04-25--container-in-proxmox-in-virtualbox/Screenshot from 2024-04-25 15-31-04.png" alt="image tooltip here" /></p>
+
+<hr />
+<p>For DNS servers, choose 8.8.8.8 (or some other publicly available server).</p>
+
+<p><img src="/assets/2024-04-25--container-in-proxmox-in-virtualbox/Screenshot from 2024-04-25 15-31-16.png" alt="image tooltip here" /></p>
+
+<hr />
+<p>Everything looks good!</p>
+
+<p><img src="/assets/2024-04-25--container-in-proxmox-in-virtualbox/Screenshot from 2024-04-25 15-31-22.png" alt="image tooltip here" /></p>
+
+<hr />
+<p>“Finish” and wait for “TASK OK”.</p>
+
+<p><img src="/assets/2024-04-25--container-in-proxmox-in-virtualbox/Screenshot from 2024-04-25 15-31-34.png" alt="image tooltip here" /></p>
+
+<hr />
+<p>Select the new container and press “Start”.</p>
+
+<p><img src="/assets/2024-04-25--container-in-proxmox-in-virtualbox/Screenshot from 2024-04-25 15-31-47.png" alt="image tooltip here" /></p>
+
+<hr />
+<p>Log in and verify network connectivity.</p>
+
+<p><img src="/assets/2024-04-25--container-in-proxmox-in-virtualbox/Screenshot from 2024-04-25 15-32-53.png" alt="image tooltip here" /></p>]]></content><author><name></name></author><summary type="html"><![CDATA[This post will show how to use the web browser interface to create a container in a Proxmox host running under Virtualbox. In Virtualbox, the network failed to initialize with the default DNS server. Using a publicly available DNS server (such as 8.8.8.8) avoided this.]]></summary></entry><entry><title type="html">Browser Access to Proxmox using Tailscale</title><link href="/2024/04/23/browser-access-to-proxmox-using-tailscale.html" rel="alternate" type="text/html" title="Browser Access to Proxmox using Tailscale" /><published>2024-04-23T23:32:36+00:00</published><updated>2024-04-23T23:32:36+00:00</updated><id>/2024/04/23/browser-access-to-proxmox-using-tailscale</id><content type="html" xml:base="/2024/04/23/browser-access-to-proxmox-using-tailscale.html"><![CDATA[<p>A proxmox server serves a browser based GUI for configuration.   This gui is accessible on localhost:8006 but there’s no easy way to run a browser on the proxmox machine so we use tailscale to serve that port to a different machine.  The tailscale setup process probably doesn’t justify a blog post but I’ll go through it here anyway.   I’ll be using the Virtualbox proxmox instance that I created and <a href="/2024/04/21/installing-proxmox-on-virtualbox.html">wrote about</a> a couple of days ago to demonstrate.</p>
+
+<hr />
+
+<p>The first step is to create an account at <a href="https://login.tailscale.com/start">tailscale</a> .</p>
+
+<hr />
+
+<p>Next, go to the tailscale <a href="https://tailscale.com/download/linux">linux download</a> page `. <br />
+<img src="/assets/2024-04-23--proxmox-tailscale/Screenshot from 2024-04-23 16-57-12.png" alt="image tooltip here" /></p>
+
+<hr />
+<p>From there copy the shell command that installs tailscale to the shell prompt of your proxmox server and run it:</p>
+
+<p><img src="/assets/2024-04-23--proxmox-tailscale/Screenshot from 2024-04-23 16-58-38.png" alt="image tooltip here" /></p>
+
+<hr />
+<p>This fails with errors related to apt source repositories. <br />
+<img src="/assets/2024-04-23--proxmox-tailscale/Screenshot from 2024-04-23 16-59-19.png" alt="image tooltip here" /></p>
+
+<hr />
+<p>Comment out out the failing lines in /etc/apt/sources.list.d/ceph.list and /etc/apt/sources.list.d/pve-enterprise.list to fix these:
+<img src="/assets/2024-04-23--proxmox-tailscale/Screenshot from 2024-04-23 17-03-54.png" alt="image tooltip here" /></p>
+
+<hr />
+<p>Now the tailscale install should succeed:
+<img src="/assets/2024-04-23--proxmox-tailscale/Screenshot from 2024-04-23 17-06-22.png" alt="image tooltip here" /></p>
+
+<hr />
+<p>Per the instructions at the end of the install output, run “tailscale up”.
+<img src="/assets/2024-04-23--proxmox-tailscale/Screenshot from 2024-04-23 17-07-15.png" alt="image tooltip here" /></p>
+
+<hr />
+<p>After using a browswer to authenticate (per the “tailscale up” output) tailscale will confirm success:
+<img src="/assets/2024-04-23--proxmox-tailscale/Screenshot from 2024-04-23 17-09-57.png" alt="image tooltip here" /></p>
+
+<hr />
+<p>Use the <a href="https://tailscale.com/kb/1242/tailscale-serve">“tailscale serve”</a> command to serve port 8006 by default:
+<img src="/assets/2024-04-23--proxmox-tailscale/Screenshot from 2024-04-23 17-13-20.png" alt="image tooltip here" /></p>
+
+<hr />
+<p>You will also need to install tailscale on any device that you want to access the Proxmox GUI from.</p>
+
+<hr />
+<p>Having installed tailscale both on your proxmox server and on the machine running the browser you should be able to acccess proxmox from anywhere.   Get the appropriate url from your tailscale login.   Having run “tailscale serve”, there is no need for port 8006 to be specified on the url in the browser and the connection established is secure: <br />
+<img src="/assets/2024-04-23--proxmox-tailscale/Screenshot from 2024-04-23 17-20-59.png" alt="image tooltip here" /></p>
+
+<hr />
+<p>The tailscale up state should persist through a reboot.  The “tailscale serve” command will also persist due to use of the “–bg” option.</p>
+
+<hr />
+<p>Using tailscale is not the only option for directing traffic to localhost:8006 on the proxmox server.   However, it’s probably as straightforward as any other technique, at least as secure, should work regardless of how your network is configured.  Also, tailscale allows you to reach your proxmox server from anywhere on the internet.   That’s not so useful if you’re running your proxmox host on a virtual machine that is running on your laptop (as mine is) but if your proxmox server is running on a physical server connected to your home network, then it might be useful to manage it from a remote location.</p>]]></content><author><name></name></author><summary type="html"><![CDATA[A proxmox server serves a browser based GUI for configuration. This gui is accessible on localhost:8006 but there’s no easy way to run a browser on the proxmox machine so we use tailscale to serve that port to a different machine. The tailscale setup process probably doesn’t justify a blog post but I’ll go through it here anyway. I’ll be using the Virtualbox proxmox instance that I created and wrote about a couple of days ago to demonstrate.]]></summary></entry><entry><title type="html">How to Contribute to This Site</title><link href="/2024/04/22/how-to-contribute-to-this-site.html" rel="alternate" type="text/html" title="How to Contribute to This Site" /><published>2024-04-22T22:19:43+00:00</published><updated>2024-04-22T22:19:43+00:00</updated><id>/2024/04/22/how-to-contribute-to-this-site</id><content type="html" xml:base="/2024/04/22/how-to-contribute-to-this-site.html"><![CDATA[<p>Contribute a new page of content as follows….</p>
+
+<hr />
+<p>First, log in to github as yourself and fork <a href="https://github.com/homeservernotes/homeservernotes.info">the github repo for this site</a>.   I’m assuming basic knowledge of github here.</p>
+
+<hr />
+<p>Then clone your fork to your local directory:</p>
+
+<p><img src="/assets/2024-04-22--contributing/Screenshot from 2024-04-22 15-15-58.png" alt="image tooltip here" /></p>
+
+<hr />
+<p>Then execute the following podman command in the cloned directory:
+<img src="/assets/2024-04-22--contributing/Screenshot from 2024-04-22 15-17-07.png" alt="image tooltip here" /></p>
+
+<hr />
+<p>This will start two tmux windows.  In one, a server will be running.  The other is available for content creation.
+<img src="/assets/2024-04-22--contributing/Screenshot from 2024-04-22 15-17-19.png" alt="image tooltip here" /></p>
+
+<hr />
+<p>In a browser, go to localhost:4000 to see the content served:
+<img src="/assets/2024-04-22--contributing/Screenshot from 2024-04-22 15-18-40.png" alt="image tooltip here" /></p>
+
+<hr />
+<p>Use “rake” to create a new page:
+<img src="/assets/2024-04-22--contributing/Screenshot from 2024-04-22 15-19-53.png" alt="image tooltip here" /></p>
+
+<hr />
+<p>Refresh the browser window to see the new page:
+<img src="/assets/2024-04-22--contributing/Screenshot from 2024-04-22 15-20-07.png" alt="image tooltip here" /></p>
+
+<hr />
+<p>The contents of the new page are specified in a <a href="https://www.markdownguide.org/tools/jekyll/">markdown</a>  file. Use vim (or any other editor) to edit the new page. Find it in the _posts subdirectory. Vim is available in the podman container but the file should also be accessible on your hard drive independent of podman if you want to use a different editor installed on your computer. :
+<img src="/assets/2024-04-22--contributing/Screenshot from 2024-04-22 15-21-38.png" alt="image tooltip here" /></p>
+
+<hr />
+<p>Use the browser to check your work.
+<img src="/assets/2024-04-22--contributing/Screenshot from 2024-04-22 15-22-12.png" alt="image tooltip here" /></p>
+
+<hr />
+<p>Make additional edits as needed.</p>
+
+<hr />
+<p>When you’re done editing, exit the podman container and use git add, git commit, git push to upload your edits to github.</p>
+
+<p><img src="/assets/2024-04-22--contributing/Screenshot from 2024-04-22 16-00-49.png" alt="image tooltip here" /></p>
+
+<hr />
+<p>From inside your browser go to github and make a pull (merge) request to move the changes to the homeservernotes account.</p>
+
+<hr />
+
+<p>Wait for the changes to be merged.   ( I’ll try to repond to pull requests ASAP ).</p>]]></content><author><name></name></author><summary type="html"><![CDATA[Contribute a new page of content as follows….]]></summary></entry></feed>
