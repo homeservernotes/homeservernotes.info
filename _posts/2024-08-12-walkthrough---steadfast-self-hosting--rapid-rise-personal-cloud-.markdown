@@ -3,7 +3,7 @@ layout: post
 title: "walkthrough: \"Steadfast Self-Hosting: Rapid-Rise Personal Cloud\""
 date: 2024-08-12 12:59:52 -0700
 published: true
-# github_comments_issueid: "create an issue and specfiy the issue id here"
+github_comments_issueid: "34"
 tags:
 ---
 The book "Steadfast Self-Hosting: Rapid-Rice Personal Cloud" is a guide to setting up your own personal home server.  I found the book to be easy to read, educational, and entertaining.  
@@ -472,7 +472,7 @@ Once the nextcloud service is running, it can be accessed in the local lan throu
 
 <img src= "{{site.baseurl}}/assets/2024-08-12-walkthrough---steadfast-self-hosting--rapid-rise-personal-cloud/nextcloud.png"  alt="your-image-description" style="border: 2px solid grey;">
 
-The DNS entries are enough to allow access to these services from anywhere on the net but the Steadfast configuration includes a filter, "lan-only", which limits internet connections to the local LAN.   This filter is enabled on a per service basis but can be removed.   To do this, remove "lan-only" from the appropriate compose.yml file (as shown below for nextcloud) and run the provision.sh script again.
+The DNS entries are enough to allow access to these services from anywhere on the net but the Steadfast configuration includes a filter, "lan-only", which limits internet connections to the local LAN.   This filter is enabled on a per service basis but can be removed.   To do this, remove "lan-only" from the appropriate compose.yml file (as shown below for nextcloud) and run the provision.sh script again as described in the "Allow WAN access" section of the Steadfast book.
 
 Diffs show "lan-only" removed from compose.yml (on admin machine):
 
