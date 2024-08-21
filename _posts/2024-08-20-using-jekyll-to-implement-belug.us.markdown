@@ -25,11 +25,11 @@ The following steps resulted in a site resembling the [belug.us site](https://be
 
 You can see the resulting page [here](https://dc25.github.io/belug.us).   It's not identical to [belug.us](https://belug.us) but it's pretty close.  Most of the content is contained in these four markdown (and one data) files:
 
-* [index.md](https://raw.githubusercontent.com/dc25/belug.us/main/index.md)
-* [about.md](https://raw.githubusercontent.com/dc25/belug.us/main/about.md)
-* [meetings.md](https://raw.githubusercontent.com/dc25/belug.us/main/meetings.md)
-* [faq.md](https://raw.githubusercontent.com/dc25/belug.us/main/faq.md)
-* [meetings.yml](https://raw.githubusercontent.com/dc25/belug.us/main/_data/meetings.yml)
+* [index.md](https://raw.githubusercontent.com/dc25/belug.us/master/index.md)
+* [about.md](https://raw.githubusercontent.com/dc25/belug.us/master/about.md)
+* [meetings.md](https://raw.githubusercontent.com/dc25/belug.us/master/meetings.md)
+* [faq.md](https://raw.githubusercontent.com/dc25/belug.us/master/faq.md)
+* [meetings.yml](https://raw.githubusercontent.com/dc25/belug.us/master/_data/meetings.yml)
 
 My intention for this demo was to minimize changes made after cloning the jekyll/minima repository so I left some content in the repository that could be deleted.  
 
