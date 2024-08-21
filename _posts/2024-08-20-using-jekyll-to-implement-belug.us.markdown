@@ -3,7 +3,7 @@ layout: post
 title: "Using jekyll to implement belug.us"
 date: 2024-08-20 18:21:06 +0000
 published: true
-# github_comments_issueid: "create an issue and specfiy the issue id here"
+github_comments_issueid: "39"
 tags:
 ---
 
