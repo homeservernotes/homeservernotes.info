@@ -1,0 +1,932 @@
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.3">Jekyll</generator><link href="/feed.xml" rel="self" type="application/atom+xml" /><link href="/" rel="alternate" type="text/html" /><updated>2024-11-18T16:09:14-08:00</updated><id>/feed.xml</id><title type="html">Home Server Group</title><entry><title type="html">Today I Learned: tailscale keys expire after 180 days</title><link href="/2024/11/17/today-i-learned-tailscale-keys-expire-after-180-days.html" rel="alternate" type="text/html" title="Today I Learned: tailscale keys expire after 180 days" /><published>2024-11-17T16:02:30-08:00</published><updated>2024-11-17T16:02:30-08:00</updated><id>/2024/11/17/today-i-learned---tailscale-keys-expire-after-180-days</id><content type="html" xml:base="/2024/11/17/today-i-learned-tailscale-keys-expire-after-180-days.html"><![CDATA[<p>After using tailscale for (I assume) 180 days, one of my nodes stopped responding through the tailscale domain name.   I logged in to the tailscale dashboard and saw that the key for that node had expired and needed to be refreshed.  Tailscale documentation says that this happens after 180 days.   Here’s the <a href="https://tailscale.com/kb/1028/key-expiry">relevant documentation</a>.</p>]]></content><author><name></name></author><summary type="html"><![CDATA[After using tailscale for (I assume) 180 days, one of my nodes stopped responding through the tailscale domain name. I logged in to the tailscale dashboard and saw that the key for that node had expired and needed to be refreshed. Tailscale documentation says that this happens after 180 days. Here’s the relevant documentation.]]></summary></entry><entry><title type="html">Getting up to speed with pi-hole</title><link href="/2024/10/19/getting-up-to-speed-with-pi-hole.html" rel="alternate" type="text/html" title="Getting up to speed with pi-hole" /><published>2024-10-19T18:56:34-07:00</published><updated>2024-10-19T18:56:34-07:00</updated><id>/2024/10/19/getting-up-to-speed-with-pi-hole</id><content type="html" xml:base="/2024/10/19/getting-up-to-speed-with-pi-hole.html"><![CDATA[<p>This is a step by step summary of what it was like to install and use pi-hole on a proxmox server serving a small home network.</p>
+
+<h2 id="install-in-proxmox-container">Install in proxmox container</h2>
+
+<ul>
+  <li>Created a new container
+    <ul>
+      <li>Static IP ( 192.168.8.141 )</li>
+      <li>2 cpus (may not have been necessary)</li>
+      <li>default settings otherwise</li>
+    </ul>
+  </li>
+  <li>Started new container</li>
+  <li>Used apt update &amp; apt upgrade to bring up to date</li>
+  <li>Used apt to install curl</li>
+  <li>Used curl to install pi-hole per <a href="https://github.com/pi-hole/pi-hole/#one-step-automated-install">instructions on site</a></li>
+  <li>Take note of pi-hole password.</li>
+  <li>Used ps to verify that pi-hole is running:</li>
+</ul>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>root@pihole2:~# ps -ef | grep pi
+message+     102       1  0 01:45 ?        00:00:00 @dbus-daemon --system --address=systemd: --nofork --nopidfile --systemd-activation --syslog-only
+pihole       158       1  0 01:45 ?        00:00:01 /usr/bin/pihole-FTL -f
+postfix      331     326  0 01:45 ?        00:00:00 pickup -l -t unix -u -c
+root         547     537  0 02:05 pts/1    00:00:00 grep --color=auto pi
+root@pihole2:~# 
+</code></pre></div></div>
+<ul>
+  <li>Reboot container and use ps again to verify automatic starting.</li>
+</ul>
+
+<h2 id="try-it-out-from-a-client-computer">Try it out from a client computer.</h2>
+
+<ul>
+  <li>
+    <p>Specify the pi-hole as DNS server by IP address.  Windows example shown below.
+<img src="/assets/2024-10-20__getting-up-to-speed-with-pi-hole/wireless_ip_settings_for_pihole.jpg" alt="your-image-description" style="border: 2px solid grey;" /></p>
+  </li>
+  <li>Make sure web browsing still works.</li>
+  <li>Access pi-hole control through browser : <code class="language-plaintext highlighter-rouge">https://192.168.8.141/admin</code></li>
+  <li>Use browser interface to disable/enable blocking.   Try browsing both ways.</li>
+</ul>
+
+<h2 id="eliminate-the-middleman-try-pi-hole-with-a-recursive-dns-server">Eliminate the middleman! Try pi-hole with a recursive DNS server.</h2>
+
+<ul>
+  <li>Per <a href="https://docs.pi-hole.net/guides/dns/unbound/">these instructions</a>, install and configure unbound.</li>
+</ul>
+
+<p>(install)</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>root@pihole2:~# apt install unbound
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+The following NEW packages will be installed:
+  unbound
+0 upgraded, 1 newly installed, 0 to remove and 0 not upgraded.
+</code></pre></div></div>
+<p>(and configure)</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>root@pihole2:~# cd /etc/unbound/unbound.conf.d/
+root@pihole2:/etc/unbound/unbound.conf.d# ls
+root-auto-trust-anchor-file.conf
+root@pihole2:/etc/unbound/unbound.conf.d# cat &gt; pi-hole.conf
+server:
+    # If no logfile is specified, syslog is used
+    # logfile: "/var/log/unbound/unbound.log"
+    verbosity: 0
+
+    interface: 127.0.0.1
+    port: 5335
+    do-ip4: yes
+    do-udp: yes
+    do-tcp: yes
+
+    # May be set to yes if you have IPv6 connectivity
+    do-ip6: no
+
+    # You want to leave this to no unless you have *native* IPv6. With 6to4 and
+    # Terredo tunnels your web browser should favor IPv4 for the same reasons
+    prefer-ip6: no
+
+    # Use this only when you downloaded the list of primary root servers!
+    # If you use the default dns-root-data package, unbound will find it automatically
+    #root-hints: "/var/lib/unbound/root.hints"
+
+    # Trust glue only if it is within the server's authority
+    harden-glue: yes
+
+    # Require DNSSEC data for trust-anchored zones, if such data is absent, the zone becomes BOGUS
+    harden-dnssec-stripped: yes
+
+    # Don't use Capitalization randomization as it known to cause DNSSEC issues sometimes
+    # see https://discourse.pi-hole.net/t/unbound-stubby-or-dnscrypt-proxy/9378 for further details
+    use-caps-for-id: no
+
+    # Reduce EDNS reassembly buffer size.
+    # IP fragmentation is unreliable on the Internet today, and can cause
+    # transmission failures when large DNS messages are sent via UDP. Even
+    # when fragmentation does work, it may not be secure; it is theoretically
+    # possible to spoof parts of a fragmented DNS message, without easy
+    # detection at the receiving end. Recently, there was an excellent study
+    # &gt;&gt;&gt; Defragmenting DNS - Determining the optimal maximum UDP response size for DNS &lt;&lt;&lt;
+    # by Axel Koolhaas, and Tjeerd Slokker (https://indico.dns-oarc.net/event/36/contributions/776/)
+    # in collaboration with NLnet Labs explored DNS using real world data from the
+    # the RIPE Atlas probes and the researchers suggested different values for
+    # IPv4 and IPv6 and in different scenarios. They advise that servers should
+    # be configured to limit DNS messages sent over UDP to a size that will not
+    # trigger fragmentation on typical network links. DNS servers can switch
+    # from UDP to TCP when a DNS response is too big to fit in this limited
+    # buffer size. This value has also been suggested in DNS Flag Day 2020.
+    edns-buffer-size: 1232
+
+    # Perform prefetching of close to expired message cache entries
+    # This only applies to domains that have been frequently queried
+    prefetch: yes
+
+    # One thread should be sufficient, can be increased on beefy machines. In reality for most users running on small networks or on a single machine, it should be unnecessary to seek performance enhancement by increasing num-threads above 1.
+    num-threads: 1
+
+    # Ensure kernel buffer is large enough to not lose messages in traffic spikes
+    so-rcvbuf: 1m
+
+    # Ensure privacy of local IP ranges
+    private-address: 192.168.0.0/16
+    private-address: 169.254.0.0/16
+    private-address: 172.16.0.0/12
+    private-address: 10.0.0.0/8
+    private-address: fd00::/8
+    private-address: fe80::/10
+root@pihole2:/etc/unbound/unbound.conf.d# ls
+pi-hole.conf  root-auto-trust-anchor-file.conf
+root@pihole2:/etc/unbound/unbound.conf.d# 
+</code></pre></div></div>
+
+<ul>
+  <li>Start and test the recursive server (“unbound”).</li>
+</ul>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>root@pihole2:/etc/unbound/unbound.conf.d# ps -ef  | grep unb
+root        8070     537  0 20:54 pts/1    00:00:00 grep --color=auto unb
+root@pihole2:/etc/unbound/unbound.conf.d# service unbound restart
+root@pihole2:/etc/unbound/unbound.conf.d# ps -ef  | grep unb
+unbound     8091       1  0 20:56 ?        00:00:00 /usr/sbin/unbound -d -p
+root        8093     537  0 20:56 pts/1    00:00:00 grep --color=auto unb
+root@pihole2:/etc/unbound/unbound.conf.d# dig pi-hole.net @127.0.0.1 -p 5335
+
+; &lt;&lt;&gt;&gt; DiG 9.18.28-0ubuntu0.22.04.1-Ubuntu &lt;&lt;&gt;&gt; pi-hole.net @127.0.0.1 -p 5335
+;; global options: +cmd
+;; Got answer:
+;; -&gt;&gt;HEADER&lt;&lt;- opcode: QUERY, status: NOERROR, id: 55935
+;; flags: qr rd ra; QUERY: 1, ANSWER: 1, AUTHORITY: 0, ADDITIONAL: 1
+
+;; OPT PSEUDOSECTION:
+; EDNS: version: 0, flags:; udp: 1232
+;; QUESTION SECTION:
+;pi-hole.net.                   IN      A
+
+;; ANSWER SECTION:
+pi-hole.net.            300     IN      A       3.18.136.52
+
+;; Query time: 146 msec
+;; SERVER: 127.0.0.1#5335(127.0.0.1) (UDP)
+;; WHEN: Sun Oct 20 20:56:32 UTC 2024
+;; MSG SIZE  rcvd: 56
+
+root@pihole2:/etc/unbound/unbound.conf.d# 
+</code></pre></div></div>
+
+<ul>
+  <li>Per <a href="https://docs.pi-hole.net/guides/dns/unbound/">same instructions</a>, set edns-packet-max .  It’s not clear (to me at least) why.
+    <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>root@pihole2:/etc/unbound/unbound.conf.d# ls /etc/dnsmasq.d              
+01-pihole.conf  06-rfc6761.conf
+root@pihole2:/etc/unbound/unbound.conf.d# cat &gt; /etc/dnsmasq.d/99-edns.conf
+edns-packet-max=1232
+root@pihole2:/etc/unbound/unbound.conf.d#    
+</code></pre></div>    </div>
+  </li>
+  <li>
+    <p>Per <a href="https://docs.pi-hole.net/guides/dns/unbound/">same instructions</a>, use browser interface to configure pi-hole to use “unbound” as recursive dns server.</p>
+  </li>
+  <li>
+    <p>Browse web from client to test.</p>
+  </li>
+  <li>Reboot proxmox container to make sure that pi-hole and unbound both start up automatically.</li>
+</ul>
+
+<h2 id="try-pi-hole-for-the-rest-of-the-network">Try pi-hole for the rest of the network.</h2>
+
+<ul>
+  <li>Log in to your router and configure DNS for the LAN to use the pi-hole.</li>
+  <li>
+    <p>NOTE: With this change in place, DNS queries still go the the router by default but then get forwarded to the pi-hole DNS server.
+<img src="/assets/2024-10-20__getting-up-to-speed-with-pi-hole//router_settings_for_pihole.jpg" alt="your-image-description" style="border: 2px solid grey;" /></p>
+  </li>
+  <li>Test multiple clients, with and without ad blocking, to make sure the internet is still accessible.</li>
+</ul>
+
+<h2 id="how-well-does-it-work">How well does it work?</h2>
+
+<ul>
+  <li>The Good
+    <ul>
+      <li>Chrome &amp; firefox browsers on computer, phone, tablet:  ads blocked.</li>
+      <li>Pinterest app on android tablet: ads blocked.</li>
+      <li>Youtube app on android tablet: ads blocked.</li>
+      <li>Youtube (streaming video with ads) on roku:   many but not all ads blocked.</li>
+    </ul>
+  </li>
+  <li>The Bad
+    <ul>
+      <li>Some videos on cnn.com no longer play with ad blocking enabled.</li>
+    </ul>
+  </li>
+  <li>The Disappointing
+    <ul>
+      <li>Prime video (streaming video with ads) on roku:   ads appear as before.</li>
+      <li>Tubi (streaming video with ads) on roku:   ads appear as before.</li>
+    </ul>
+  </li>
+</ul>]]></content><author><name></name></author><summary type="html"><![CDATA[This is a step by step summary of what it was like to install and use pi-hole on a proxmox server serving a small home network.]]></summary></entry><entry><title type="html">Meeting on October 17</title><link href="/2024/10/18/meeting-on-october-17.html" rel="alternate" type="text/html" title="Meeting on October 17" /><published>2024-10-18T05:22:48-07:00</published><updated>2024-10-18T05:22:48-07:00</updated><id>/2024/10/18/meeting-on-october-17</id><content type="html" xml:base="/2024/10/18/meeting-on-october-17.html"><![CDATA[<h1 id="overview">Overview</h1>
+
+<p>The group met on zoom.  Six people attended.</p>
+
+<h1 id="topics-of-discussion">Topics of Discussion</h1>
+
+<ul>
+  <li>identity management systems: <a href="https://ldap.com/">LDAP</a>/<a href="https://github.com/lldap/lldap">LLDAP</a>/<a href="https://www.freeipa.org/">freeipa</a>/<a href="https://www.keycloak.org/">keycloak</a></li>
+  <li>Linux permissions: user/group/other , umask</li>
+  <li>project reqruiements : fileserver? wireguard?</li>
+  <li><a href="https://cert-manager.io/">certmanager</a></li>
+  <li><a href="https://en.wikipedia.org/wiki/Common_Address_Redundancy_Protocol">carp (common access redundancy protocol )</a></li>
+  <li><a href="https://www.haproxy.org/">haproxy</a></li>
+  <li><a href="https://ceph.com/en/">ceph</a>/<a href="https://docs.docker.com/engine/swarm/">dockerSwarm</a> as easier alternative to kubernetes</li>
+  <li><a href="https://rook.io/">rook</a></li>
+  <li>email: <a href="https://en.wikipedia.org/wiki/Local_Mail_Transfer_Protocol">lmtp</a>, <a href="https://www.dovecot.org/">dovecot</a>, <a href="https://www.postfix.org/">postfix</a></li>
+  <li><a href="https://pi-hole.net/">pi-hole</a></li>
+</ul>]]></content><author><name></name></author><summary type="html"><![CDATA[Overview]]></summary></entry><entry><title type="html">Meeting on October 3</title><link href="/2024/10/04/meeting-on-october-3.html" rel="alternate" type="text/html" title="Meeting on October 3" /><published>2024-10-04T08:08:04-07:00</published><updated>2024-10-04T08:08:04-07:00</updated><id>/2024/10/04/meeting-on-october-3</id><content type="html" xml:base="/2024/10/04/meeting-on-october-3.html"><![CDATA[<h1 id="overview">Overview</h1>
+<p>The group met on zoom. Seven people attended.</p>
+
+<h1 id="some-topics-discussed">Some Topics Discussed</h1>
+<ul>
+  <li>ansible</li>
+  <li>github collaboration (forks &amp; pull requests)</li>
+  <li>dhcp</li>
+  <li>dhcp lease duration</li>
+  <li>ipv6</li>
+  <li>ipsec</li>
+</ul>]]></content><author><name></name></author><summary type="html"><![CDATA[Overview The group met on zoom. Seven people attended.]]></summary></entry><entry><title type="html">Jekyll quickstart</title><link href="/2024/09/06/jekyll-quickstart.html" rel="alternate" type="text/html" title="Jekyll quickstart" /><published>2024-09-06T15:44:26-07:00</published><updated>2024-09-06T15:44:26-07:00</updated><id>/2024/09/06/jekyll-quickstart</id><content type="html" xml:base="/2024/09/06/jekyll-quickstart.html"><![CDATA[<p>In the Septemeber 5 meeting we did a walkthrough of how to build a simple website with jekyll.  This post goes through that process.   As a rough overview, the steps are:</p>
+<ul>
+  <li>Update your computer with the necessary utilities (npm, node, some other npm related utilities).</li>
+  <li>Clone the jekyll/minima repository.</li>
+  <li>Prepare the minima repository with the necessary dependencies.</li>
+  <li>Run jekyll to either serve or build the site.</li>
+</ul>
+
+<p>In more detail:</p>
+
+<h1 id="update-your-computer-as-needed">Update your computer as needed.</h1>
+
+<p>First bring the OS up to date.   I’m using Ubuntu in this example so the package manager is apt.</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>dev@xela:~/workdir$ sudo apt update -y                                                      
+dev@xela:~/workdir$ sudo apt upgrade -y
+</code></pre></div></div>
+
+<p>Install the utilities needed to support jekyll:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>dev@xela:~/workdir$ sudo apt install -y npm ruby-dev ruby-bundler zlib1g-dev
+Reading package lists... Done
+</code></pre></div></div>
+
+<p>Bring npm and node up to the latest versions:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>dev@xela:~/workdir$ sudo npm install -g n
+added 1 package in 279ms
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>dev@xela:~/workdir$ sudo n latest
+  installing : node-v22.8.0
+       mkdir : /usr/local/n/versions/node/22.8.0
+       fetch : https://nodejs.org/dist/v22.8.0/node-v22.8.0-linux-x64.tar.xz
+     copying : node/22.8.0
+   installed : v22.8.0 (with npm 10.8.2)
+
+dev@xela:~/workdir$ hash -r
+dev@xela:~/workdir$ node --version
+v22.8.0
+dev@xela:~/workdir$ npm --version
+10.8.2
+</code></pre></div></div>
+
+<h1 id="clone-the-jekyllminima-repository">Clone the jekyll/minima repository.</h1>
+
+<p>This walkthrough uses jekyll/minima which specifies a basic website but the steps should work with any jekyll site, including the <a href="https://github.com/dc25/belug.us">belug.us lookalike</a> and <a href="https://github.com/homeservernotes/homeservernotes.info">this site itself</a>.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>dev@xela:~/workdir$ git clone git@github.com:jekyll/minima.git
+Cloning into 'minima'...
+</code></pre></div></div>
+
+<h1 id="prepare-the-minima-repository-with-the-necessary-dependencies">Prepare the minima repository with the necessary dependencies:</h1>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>dev@xela:~/workdir/minima$ bundle config path 'vendor/bundle' --local
+dev@xela:~/workdir/minima$ bundle install
+Resolving dependencies...
+Fetching gem metadata from https://rubygems.org/............
+</code></pre></div></div>
+<h1 id="use-jekyll-to-build-and-serve-the-site">Use jekyll to build and serve the site:</h1>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>dev@xela:~/workdir/minima$ bundle exec jekyll serve -H 0.0.0.0
+Configuration file: /home/dev/workdir/minima/_config.yml
+ Theme Config file: /home/dev/workdir/minima/_config.yml
+            Source: /home/dev/workdir/minima
+       Destination: /home/dev/workdir/minima/_site
+ Incremental build: disabled. Enable with --incremental
+      Generating...
+       Jekyll Feed: Generating feed for posts
+                    done in 0.351 seconds.
+ Auto-regeneration: enabled for '/home/dev/workdir/minima'
+    Server address: http://0.0.0.0:4000
+  Server running... press ctrl-c to stop.
+[2024-09-06 22:20:52] ERROR `/favicon.ico' not found.
+^C^C
+</code></pre></div></div>
+
+<h1 id="or-use-jekyll-to-just-build-the-site">Or use jekyll to just build the site:</h1>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>dev@xela:~/workdir/minima$ rm -rf _site/
+dev@xela:~/workdir/minima$ bundle exec jekyll build
+Configuration file: /home/dev/workdir/minima/_config.yml
+ Theme Config file: /home/dev/workdir/minima/_config.yml
+            Source: /home/dev/workdir/minima
+       Destination: /home/dev/workdir/minima/_site
+ Incremental build: disabled. Enable with --incremental
+      Generating...
+       Jekyll Feed: Generating feed for posts
+                    done in 0.446 seconds.
+ Auto-regeneration: disabled. Use --watch to enable.
+dev@xela:~/workdir/minima$ ls -rd _site/
+_site/
+dev@xela:~/workdir/minima$
+</code></pre></div></div>
+<h1 id="view-the-site-in-your-browser">View the site in your browser.</h1>
+
+<p>If you use the “bundle exec jekyll serve -H 0.0.0.0” command shown above you should be able to see the site at port 4000 for any IP address the computer presents.   You can also serve the site with a server of your choice after running “bundle exec jekyll build” (also shown above).  The jekyll/minima site should look something like this:
+<img src="/assets/2024-09-06-jekyll-quickstart/jekyllminima.jpg" alt="your-image-description" style="border: 2px solid grey;" /></p>
+
+<h1 id="configure-as-needed">Configure as needed:</h1>
+
+<p>At this point you can modify the minima content to specify whatever website you want.  This is how the belug.us lookalike was created.  The details of how to do that are beyond the scope of this post.</p>]]></content><author><name></name></author><summary type="html"><![CDATA[In the Septemeber 5 meeting we did a walkthrough of how to build a simple website with jekyll. This post goes through that process. As a rough overview, the steps are: Update your computer with the necessary utilities (npm, node, some other npm related utilities). Clone the jekyll/minima repository. Prepare the minima repository with the necessary dependencies. Run jekyll to either serve or build the site.]]></summary></entry><entry><title type="html">Meeting on September 5</title><link href="/2024/09/06/meeting-on-september-5.html" rel="alternate" type="text/html" title="Meeting on September 5" /><published>2024-09-06T14:02:53-07:00</published><updated>2024-09-06T14:02:53-07:00</updated><id>/2024/09/06/meeting-on-september-5</id><content type="html" xml:base="/2024/09/06/meeting-on-september-5.html"><![CDATA[<h1 id="overview">Overview</h1>
+<p>The group met on zoom. Six people attended.</p>
+
+<h1 id="topics-discussed">Topics Discussed</h1>
+
+<ul>
+  <li><a href="https://ipv6.rs/">IPv6rs</a></li>
+  <li><a href="https://github.com/mudler/LocalAI">LocalAI</a> and <a href="https://apps.nextcloud.com/apps/integration_openai">self-hosted AI with Nextcloud integration</a></li>
+  <li><a href="https://actualbudget.com/">Actual Budget</a></li>
+  <li><a href="https://openai.com/index/whisper/">whisper voice to text</a></li>
+  <li><a href="https://github.com/instructlab">Instructlab (local AI chatbot)</a></li>
+  <li><a href="https://www.nomic.ai/gpt4all">gpt4all (another local AI tool)</a></li>
+  <li><a href="https://opentofu.org/">opentofu</a></li>
+  <li><a href="https://developer.hashicorp.com/terraform/language/state/workspaces">Terraform Workspaces</a></li>
+  <li><a href="https://jekyllrb.com/">jekyll</a> build walkthrough</li>
+</ul>]]></content><author><name></name></author><summary type="html"><![CDATA[Overview The group met on zoom. Six people attended.]]></summary></entry><entry><title type="html">Using jekyll to implement belug.us</title><link href="/2024/08/20/using-jekyll-to-implement-belug.us.html" rel="alternate" type="text/html" title="Using jekyll to implement belug.us" /><published>2024-08-20T11:21:06-07:00</published><updated>2024-08-20T11:21:06-07:00</updated><id>/2024/08/20/using-jekyll-to-implement-belug.us</id><content type="html" xml:base="/2024/08/20/using-jekyll-to-implement-belug.us.html"><![CDATA[<p>In the August 15 meeting one of the topics was static site generators.   We discussed what it would take to implement <a href="https://belug.us">belug.us</a> or something similar using a static site generator.  As an exercise/demonstration, I created a site similar to belug.us using jekyll.  I did this by forking <a href="https://github.com/jekyll/minima">jekyll/minima</a> as <a href="https://github.com/dc25/belug.us">belug.us</a> and editing it until I was happy with the <a href="https://dc25.github.io/belug.us/">results</a>.</p>
+
+<p>The following steps resulted in a site resembling the <a href="https://belug.us/">belug.us site</a>.</p>
+
+<ul>
+  <li>Clone repo to belug.us (on local machine).   Run jekyll server to monitor changes along the way.</li>
+  <li>Change site name in _config.yml file to “Bellevue Linux Users Group”</li>
+  <li>Change index.md layout (in front matter) from home layout to page layout.   This gets blog posts off of front page.</li>
+  <li>Create about.md, faq.md and meetings.md as copies of about.md.   Change title and permalink in frontmatter.  Add both to _config.yml</li>
+  <li>Cut and pasted content from belug.us to the appropriate markdown files (index.md, about.md, faq.md &amp; meetings.md).</li>
+  <li>Add screen.css (downloaded from belug.us site) to _sass directory as screen.sccs. Include this file from minima/custom-styles.scss</li>
+  <li>Add images bg_large.jpg and bg_grad.png (downloaded from belug.us site) to assets/img directory.</li>
+  <li>Introduce two new divs in _layouts/base.html with class “content” and class “container” .   These classes are referenced from screen.css.   With these divs in place, the site starts to look like belug.us</li>
+  <li>Other minor adjustments to markdown and css to improve look &amp; feel.</li>
+  <li>Added _data/meetings.yml to hold meeting dates.</li>
+</ul>
+
+<p>You can see the resulting page <a href="https://dc25.github.io/belug.us">here</a>.   It’s not identical to <a href="https://belug.us">belug.us</a> but it’s pretty close.  Most of the content is contained in these four markdown (and one data) files:</p>
+
+<ul>
+  <li><a href="https://raw.githubusercontent.com/dc25/belug.us/master/index.md">index.md</a></li>
+  <li><a href="https://raw.githubusercontent.com/dc25/belug.us/master/about.md">about.md</a></li>
+  <li><a href="https://raw.githubusercontent.com/dc25/belug.us/master/meetings.md">meetings.md</a></li>
+  <li><a href="https://raw.githubusercontent.com/dc25/belug.us/master/faq.md">faq.md</a></li>
+  <li><a href="https://raw.githubusercontent.com/dc25/belug.us/master/_data/meetings.yml">meetings.yml</a></li>
+</ul>
+
+<p>My intention for this demo was to minimize changes made after cloning the jekyll/minima repository so I left some content in the repository that could be deleted.</p>]]></content><author><name></name></author><summary type="html"><![CDATA[In the August 15 meeting one of the topics was static site generators. We discussed what it would take to implement belug.us or something similar using a static site generator. As an exercise/demonstration, I created a site similar to belug.us using jekyll. I did this by forking jekyll/minima as belug.us and editing it until I was happy with the results.]]></summary></entry><entry><title type="html">Meeting on August 15</title><link href="/2024/08/15/meeting-on-august-15.html" rel="alternate" type="text/html" title="Meeting on August 15" /><published>2024-08-15T17:37:33-07:00</published><updated>2024-08-15T17:37:33-07:00</updated><id>/2024/08/15/meeting-on-august-15</id><content type="html" xml:base="/2024/08/15/meeting-on-august-15.html"><![CDATA[<h1 id="overview">Overview</h1>
+<p>The group met on zoom. Four people attended.</p>
+
+<h1 id="topics">Topics</h1>
+
+<ul>
+  <li>Flatpacks</li>
+  <li>timeshift (btrfs)</li>
+  <li>RAID 0,1,2,5</li>
+  <li>proxmox/ceph</li>
+  <li>battery vs ups</li>
+  <li>web site details</li>
+  <li>jekyll, hugo, joomla</li>
+  <li>rss</li>
+</ul>]]></content><author><name></name></author><summary type="html"><![CDATA[Overview The group met on zoom. Four people attended.]]></summary></entry><entry><title type="html">walkthrough: “Steadfast Self-Hosting: Rapid-Rise Personal Cloud”</title><link href="/2024/08/12/walkthrough-steadfast-self-hosting-rapid-rise-personal-cloud.html" rel="alternate" type="text/html" title="walkthrough: “Steadfast Self-Hosting: Rapid-Rise Personal Cloud”" /><published>2024-08-12T12:59:52-07:00</published><updated>2024-08-12T12:59:52-07:00</updated><id>/2024/08/12/walkthrough---steadfast-self-hosting--rapid-rise-personal-cloud-</id><content type="html" xml:base="/2024/08/12/walkthrough-steadfast-self-hosting-rapid-rise-personal-cloud.html"><![CDATA[<p>The book “Steadfast Self-Hosting: Rapid-Rice Personal Cloud” is a guide to setting up your own personal home server.  I found the book to be easy to read, educational, and entertaining.</p>
+
+<p>The book has a <a href="https://selfhostbook.com">companion website</a> where you can learn more about the book and buy it if you want to.   I purchased the book and I encourage you to also.</p>
+
+<p>The rest of this post is a summary of my experience with the home server setup process outlined in the book.</p>
+
+<p>The server that I used was a repurposed Dell Latitude E5430 with 16GB RAM, 2TB SSD and an I5 processor, running Ubuntu Server 24.04 (installed from ISO just a couple of days ago). The book also calls for an “admin machine”.  For this I used a VirtualBox virtual machine running Ubuntu Desktop 24.04 under a Windows host.  The purpose of the admin machine is to remotely configure the server.</p>
+
+<p>The Steadfast system expects you to have registered a DNS domain and chosen a DNS “provider” for that domain. The domain that I purchased for this post was “cgull.tech” and I chose DNS provider, DigitalOcean, which provides the necessary nameservers and API access at no cost.   Thank you, DigitalOcean</p>
+
+<p>After this process is complete the end result should be a server with the services, Nextcloud, Jellyfin, Wallabag, Watchtower, and Scratch installed.  Local (LAN) access to these services is enabled by default.  General internet access can be enabled for any/all of these services.</p>
+
+<h1 id="setting-up-the-domain-cgulltech">Setting up the domain (cgull.tech).</h1>
+
+<p>According to the Steadfast book, the Steadfast tools also work with these DNS providers: “Duck DNS” “Namecheap”, “DigitalOcean”, and “Route 53”.   The screenshots below walk through the process of setting up DigitalOcean as a DNS provider.</p>
+
+<p>From the DigitalOcean website, create an API access token.   Record this for later use:
+<img src="/assets/2024-08-12-walkthrough---steadfast-self-hosting--rapid-rise-personal-cloud/do_create_token.png" alt="your-image-description" style="border: 2px solid grey;" /></p>
+
+<p>Also from the DigitalOcean website, Go to “Manage DNS on DigitalOcean” (shown below);
+<img src="/assets/2024-08-12-walkthrough---steadfast-self-hosting--rapid-rise-personal-cloud/do_manage_dns.png" alt="your-image-description" style="border: 2px solid grey;" /></p>
+
+<p>Enter your domain (cgull.tech in my case).
+<img src="/assets/2024-08-12-walkthrough---steadfast-self-hosting--rapid-rise-personal-cloud/do_add_domain.png" alt="your-image-description" style="border: 2px solid grey;" /></p>
+
+<p>DigitalOcean initially creates three NS records.  These will also need to be entered at your registrar (where you purchased the domain) :
+<img src="/assets/2024-08-12-walkthrough---steadfast-self-hosting--rapid-rise-personal-cloud/do_dns_records.png" alt="your-image-description" style="border: 2px solid grey;" /></p>
+
+<p>At your DNS registrar enter the same nameservers shown in NS records by the DNS provider (DigitalOcean).   The registrar that I used was ionos.com so I had to leave DigitalOcean and log in to ionos.com:
+<img src="/assets/2024-08-12-walkthrough---steadfast-self-hosting--rapid-rise-personal-cloud/ionos_custom_name_servers.png" alt="your-image-description" style="border: 2px solid grey;" /></p>
+
+<p>After this is done “dig” can be used on the command line to verify that the name servers have been updated :</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>dave@driver:/tmp$ dig  +nocmd cgull.tech ns +noall +answer
+cgull.tech.             1644    IN      NS      ns1.digitalocean.com.
+cgull.tech.             1644    IN      NS      ns3.digitalocean.com.
+cgull.tech.             1644    IN      NS      ns2.digitalocean.com.
+</code></pre></div></div>
+
+<p>This DNS setup is required for the Steadfast setup script (provision.sh) to generate encryption certificates and is the bare minimum DNS configuration needed for the setup script to succeed.
+Later in the process some additional DNS records will be added to direct internet traffic to the server.</p>
+
+<h1 id="setting-up-the-admin-machine">Setting up the admin machine.</h1>
+
+<p>Note that this is the admin machine - not the server.</p>
+
+<p>The following changes to /etc/hosts and .ssh configuration can be found in the “SSH setup” section in the Steadfast book.</p>
+
+<p>The Steadfast tools use the name, “mario_server” to refer to the server.  This is configured by editing /etc/hosts on the admin machine.  I use git to record changes made to my /etc directory.   In the transcript below I’m using git to show changes made in /etc/hosts.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>root@driver:/etc# git diff hosts
+root@driver:/etc#
+root@driver:/etc# cat hosts
+127.0.0.1 localhost
+127.0.1.1 driver
+
+# The following lines are desirable for IPv6 capable hosts
+::1     ip6-localhost ip6-loopback
+fe00::0 ip6-localnet
+ff00::0 ip6-mcastprefix
+ff02::1 ip6-allnodes
+ff02::2 ip6-allrouters
+root@driver:/etc# cat &gt;&gt; hosts
+
+# Adding the following per Steadfast self hosting book:
+192.168.8.247  mario_server
+root@driver:/etc# git diff hosts
+diff --git a/hosts b/hosts
+index 974c68f..53a31d7 100644
+--- a/hosts
++++ b/hosts
+@@ -7,3 +7,6 @@ fe00::0 ip6-localnet
+ ff00::0 ip6-mcastprefix
+ ff02::1 ip6-allnodes
+ ff02::2 ip6-allrouters
++
++# Adding the following per Steadfast self hosting book:
++192.168.8.247  mario_server
+root@driver:/etc# cat hosts
+127.0.0.1 localhost
+127.0.1.1 driver
+
+# The following lines are desirable for IPv6 capable hosts
+::1     ip6-localhost ip6-loopback
+fe00::0 ip6-localnet
+ff00::0 ip6-mcastprefix
+ff02::1 ip6-allnodes
+ff02::2 ip6-allrouters
+
+# Adding the following per Steadfast self hosting book:
+192.168.8.247  mario_server
+root@driver:/etc#
+</code></pre></div></div>
+
+<p>Use ping to confirm that the server is accessible:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>dave@driver:/etc$
+dave@driver:/etc$ ping mario_server
+PING mario_server (192.168.8.247) 56(84) bytes of data.
+64 bytes from mario_server (192.168.8.247): icmp_seq=1 ttl=64 time=3.76 ms
+64 bytes from mario_server (192.168.8.247): icmp_seq=2 ttl=64 time=5.15 ms
+64 bytes from mario_server (192.168.8.247): icmp_seq=3 ttl=64 time=3.59 ms
+^C
+--- mario_server ping statistics ---
+3 packets transmitted, 3 received, 0% packet loss, time 2005ms
+rtt min/avg/max/mdev = 3.589/4.165/5.150/0.699 ms
+dave@driver:/etc$
+</code></pre></div></div>
+
+<p>Configure ssh to to access the server as the appropriate user.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>dave@driver:~$ cd .ssh
+dave@driver:~/.ssh$ ls
+authorized_keys  id_rsa  id_rsa.pub
+dave@driver:~/.ssh$ cat &gt; config
+Host mario_server
+  User dave
+dave@driver:~/.ssh$
+dave@driver:~/.ssh$ ssh mario_server
+The authenticity of host 'mario_server (192.168.8.247)' can't be established.
+ED25519 key fingerprint is SHA256:MV3EfXxBMcLuCZRsGkOHJdjaUUrwFZMJB567+wiRRp4.
+This key is not known by any other names.
+Are you sure you want to continue connecting (yes/no/[fingerprint])? yes
+Warning: Permanently added 'mario_server' (ED25519) to the list of known hosts.
+dave@mario_server's password:
+Welcome to Ubuntu 24.04 LTS (GNU/Linux 6.8.0-39-generic x86_64)
+
+ * Documentation:  https://help.ubuntu.com
+ * Management:     https://landscape.canonical.com
+ * Support:        https://ubuntu.com/pro
+
+This system has been minimized by removing packages and content that are
+not required on a system that users do not log into.
+
+To restore this content, you can run the 'unminimize' command.
+Last login: Mon Aug  5 22:23:39 2024 from 192.168.8.146
+dave@demoserver:~$
+</code></pre></div></div>
+
+<p>Copy the public half of your ssh-key pair to the server to enable login without a password.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>dave@driver:~$ ssh-copy-id mario_server
+/usr/bin/ssh-copy-id: INFO: Source of key(s) to be installed: "/home/dave/.ssh/id_rsa.pub"
+/usr/bin/ssh-copy-id: INFO: attempting to log in with the new key(s), to filter out any that are already installed
+/usr/bin/ssh-copy-id: INFO: 1 key(s) remain to be installed -- if you are prompted now it is to install the new keys
+dave@mario_server's password:
+
+Number of key(s) added: 1
+
+Now try logging into the machine, with:   "ssh 'mario_server'"
+and check to make sure that only the key(s) you wanted were added.
+
+dave@driver:~$ ssh mario_server
+Welcome to Ubuntu 24.04 LTS (GNU/Linux 6.8.0-39-generic x86_64)
+
+ * Documentation:  https://help.ubuntu.com
+ * Management:     https://landscape.canonical.com
+ * Support:        https://ubuntu.com/pro
+
+This system has been minimized by removing packages and content that are
+not required on a system that users do not log into.
+
+To restore this content, you can run the 'unminimize' command.
+Last login: Mon Aug  5 22:33:17 2024 from 192.168.8.155
+dave@demoserver:~$
+</code></pre></div></div>
+
+<h1 id="provisioning-the-server">Provisioning the server.</h1>
+
+<p>The following process can be found in the “Provision server” section in the Steadfast book.</p>
+
+<p>The first thing to do is to clone the source repo from github:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>dave@driver:~$ git clone  https://github.com/meonkeys/shb.git
+Cloning into 'shb'...
+remote: Enumerating objects: 4726, done.
+remote: Counting objects: 100% (1076/1076), done.
+remote: Compressing objects: 100% (318/318), done.
+remote: Total 4726 (delta 763), reused 1047 (delta 744), pack-reused 3650
+Receiving objects: 100% (4726/4726), 21.86 MiB | 893.00 KiB/s, done.
+Resolving deltas: 100% (3160/3160), done.
+dave@driver
+</code></pre></div></div>
+
+<p>The provision script depends on ansible so install ansible:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>dave@driver:~/shb/mario/ansible$ sudo apt install ansible
+Reading package lists... 
+</code></pre></div></div>
+
+<p>Run the provision script.    It creates a config file to be filled out.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>dave@driver:~/shb/mario/ansible$ ./provision.sh
+You don't have a config file. I'll create one for you now.
+
+Please edit '/home/dave/shb/mario/ansible/config' and re-run this script.
+dave@driver:~/shb/mario/ansible$
+</code></pre></div></div>
+
+<p>So far, no changes have been made on the server.  The provision.sh script needs some parameters to be set in the config file (as called for in the previous transcript).</p>
+
+<h1 id="configuration">Configuration</h1>
+
+<p>I had to set 7 variables in the config file.    The “DO_AUTH_TOKEN” came from DigitalOcean (as shown earlier in this post).</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code># Specify your DNS provider here.
+# Must be ONE of namecheap, digitalocean, route53, or duckdns.
+# This and the corresponding provider-specific variables below are only used for directly manipulating DNS records to pass the DNS challenge for obtaining HTTPS encryption certs.
+export DNS_API_PROVIDER='digitalocean'
+
+### DigitalOcean API credentials ###
+# If you specified digitalocean for DNS_API_PROVIDER above, enter real values in this section. Otherwise leave blank.
+export DO_AUTH_TOKEN='dop_v1_5ad0fe8761a27e996c249999999999999999999999d70874fabc5c5a64482eef'
+
+# Notification email for certificate errors / expirations.
+# Use a value here matching what you use with your DNS API provider.
+# You may receive emails from Let's Encrypt at this address.
+export DNS_RESOLVER_EMAIL='example@example.com'
+
+# A domain name you own, or at least one you control.
+# Services will be named using subdomains, e.g. wallabag.example.com, jellyfin.example.com
+# Note: domain names are not case-sensitive.
+# Warning: Changing this later may be difficult.
+export MARIO_DOMAIN_NAME='cgull.tech'
+
+# Required to squelch a Nextcloud warning.
+# Pick your code from https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2#Officially_assigned_code_elements .
+# See https://docs.nextcloud.com/server/stable/admin_manual/configuration_server/config_sample_php_parameters.html?highlight=phone#user-experience
+export DEFAULT_PHONE_REGION='US'
+
+# Your server's time zone.
+# Must correspond with an available timezone data file in /usr/share/zoneinfo on your server.
+# For example, if you are in Seattle, use 'America/Los_Angeles', short for /usr/share/zoneinfo/America/Los_Angeles
+# Note that 'US/Pacific' is no longer valid.
+# Leaving this is 'Etc/Zulu' is fine too.
+export TZ='America/Los_Angeles'
+
+# Value to use for the `lan-only` middleware, which is enabled by default.
+# This is a range of IP addresses in CIDR notation.
+# See https://en.wikipedia.org/wiki/CIDR#CIDR_notation
+# The default value assumes LAN addresses match 192.168.1.*
+export LAN_ONLY_ALLOWED='192.168.8.0/24'
+
+</code></pre></div></div>
+<p>With the config file filled out, run provision.sh again.  The “BECOME” password is your password on the server to be provisioned and should only be prompted for one time.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>dave@driver:~/shb/mario/ansible$ ./provision.sh
+BECOME password:
+
+PLAY [all] *******************************************************************************************************************************************************************************************************
+
+TASK [base : Configure apt cache] ********************************************************************************************************************************************************************************
+ok: [mario_server]
+
+TASK [base : Install packages] ***********************************************************************************************************************************************************************************
+changed: [mario_server]
+
+TASK [base : Set timezone] ***************************************************************************************************************************************************************************************
+[WARNING]: Module remote_tmp /root/.ansible/tmp did not exist and was created with a mode of 0700, this may cause issues when running as another user. To avoid this, create the remote_tmp dir with the correct
+permissions manually
+changed: [mario_server]
+
+TASK [base : Enable UFW] *****************************************************************************************************************************************************************************************
+changed: [mario_server]
+
+TASK [base : Disable logging] ************************************************************************************************************************************************************************************
+changed: [mario_server]
+
+TASK [base : Allow SSH] ******************************************************************************************************************************************************************************************
+changed: [mario_server]
+
+TASK [base : Allow insecure HTTP traffic] ************************************************************************************************************************************************************************
+changed: [mario_server]
+
+TASK [base : Allow secure HTTP traffic] **************************************************************************************************************************************************************************
+changed: [mario_server]
+
+TASK [base : Allow passwordless sudo] ****************************************************************************************************************************************************************************
+changed: [mario_server]
+
+TASK [base : increase UDP read buffer limits] ********************************************************************************************************************************************************************
+changed: [mario_server]
+
+TASK [base : increase UDP write buffer limits] *******************************************************************************************************************************************************************
+changed: [mario_server]
+
+TASK [docker : Install packages] *********************************************************************************************************************************************************************************
+changed: [mario_server]
+
+TASK [docker : Enable service] ***********************************************************************************************************************************************************************************
+ok: [mario_server]
+
+TASK [services : Create root-owned service directories] **********************************************************************************************************************************************************
+changed: [mario_server] =&gt; (item=/data)
+changed: [mario_server] =&gt; (item=/data/nextcloud)
+changed: [mario_server] =&gt; (item=/data/nextcloud/db)
+changed: [mario_server] =&gt; (item=/data/nextcloud/root)
+changed: [mario_server] =&gt; (item=/data/traefik)
+changed: [mario_server] =&gt; (item=/data/traefik/etc)
+changed: [mario_server] =&gt; (item=/data/wallabag)
+changed: [mario_server] =&gt; (item=/root/ops)
+changed: [mario_server] =&gt; (item=/root/ops/jellyfin)
+changed: [mario_server] =&gt; (item=/root/ops/nextcloud)
+changed: [mario_server] =&gt; (item=/root/ops/scratch)
+changed: [mario_server] =&gt; (item=/root/ops/scratch/custom)
+changed: [mario_server] =&gt; (item=/root/ops/traefik)
+changed: [mario_server] =&gt; (item=/root/ops/wallabag)
+changed: [mario_server] =&gt; (item=/root/ops/watchtower)
+
+TASK [services : Process and sync service configs] ***************************************************************************************************************************************************************
+changed: [mario_server] =&gt; (item={'src': 'ops/jellyfin/compose.yml', 'dest': '/root/ops/jellyfin/compose.yml'})
+changed: [mario_server] =&gt; (item={'src': 'ops/nextcloud/compose.yml', 'dest': '/root/ops/nextcloud/compose.yml'})
+changed: [mario_server] =&gt; (item={'src': 'ops/scratch/compose.yml', 'dest': '/root/ops/scratch/compose.yml'})
+changed: [mario_server] =&gt; (item={'src': 'ops/scratch/custom/Dockerfile', 'dest': '/root/ops/scratch/custom/Dockerfile'})
+changed: [mario_server] =&gt; (item={'src': 'ops/scratch/custom/webpack.config.js', 'dest': '/root/ops/scratch/custom/webpack.config.js'})
+changed: [mario_server] =&gt; (item={'src': 'ops/traefik/compose.yml', 'dest': '/root/ops/traefik/compose.yml'})
+changed: [mario_server] =&gt; (item={'src': 'ops/wallabag/compose.yml', 'dest': '/root/ops/wallabag/compose.yml'})
+changed: [mario_server] =&gt; (item={'src': 'ops/watchtower/compose.yml', 'dest': '/root/ops/watchtower/compose.yml'})
+
+TASK [services : Create jellyfin group] **************************************************************************************************************************************************************************
+changed: [mario_server]
+
+TASK [services : Create jellyfin user] ***************************************************************************************************************************************************************************
+changed: [mario_server]
+
+TASK [services : Create jellyfin-owned directories] **************************************************************************************************************************************************************
+ok: [mario_server] =&gt; (item=/data/jellyfin/home)
+changed: [mario_server] =&gt; (item=/data/jellyfin/config)
+
+TASK [services : Create Wallabag-owned directories] **************************************************************************************************************************************************************
+changed: [mario_server] =&gt; (item=/data/wallabag/images)
+changed: [mario_server] =&gt; (item=/data/wallabag/main)
+changed: [mario_server] =&gt; (item=/data/wallabag/main/db)
+
+TASK [services : Create Wallabag db] *****************************************************************************************************************************************************************************
+changed: [mario_server]
+
+TASK [services : Create Nextcloud-owned shared media directories] ************************************************************************************************************************************************
+changed: [mario_server] =&gt; (item=/data/shared/media/video)
+changed: [mario_server] =&gt; (item=/data/shared/media/music)
+
+TASK [services : increase inotify limits] ************************************************************************************************************************************************************************
+changed: [mario_server]
+
+TASK [services : Check if Nextcloud config file exists] **********************************************************************************************************************************************************
+ok: [mario_server]
+
+TASK [services : Install PHP lint script] ************************************************************************************************************************************************************************
+changed: [mario_server]
+
+TASK [services : Add phone region to Nextcloud config] ***********************************************************************************************************************************************************
+skipping: [mario_server]
+
+TASK [services : Define arbitrary maintenance window] ************************************************************************************************************************************************************
+skipping: [mario_server]
+
+TASK [services : Install docker-compose shortcut script] *********************************************************************************************************************************************************
+changed: [mario_server]
+
+TASK [services : Install dc Bash completion] *********************************************************************************************************************************************************************
+changed: [mario_server]
+
+RUNNING HANDLER [base : timedatectl set-timezone] ****************************************************************************************************************************************************************
+changed: [mario_server]
+
+PLAY RECAP *******************************************************************************************************************************************************************************************************
+mario_server               : ok=27   changed=24   unreachable=0    failed=0    skipped=2    rescued=0    ignored=0
+
+dave@driver:~/shb/mario/ansible$
+</code></pre></div></div>
+<h1 id="working-with-services">Working with services</h1>
+
+<p>Two additional DNS records will be required to direct traffic to the server: an “A” record to assign a name to your public IP address (this will use cgull.tech) and a wildcard “CNAME” record to alias subdomains of cgull.tech to cgull.tech.</p>
+
+<p>Use curl as follows to get your public IP address:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>dave@driver:/tmp$ curl -4 icanhazip.com 2&gt; /dev/null
+71.212.123.198
+</code></pre></div></div>
+
+<p><img src="/assets/2024-08-12-walkthrough---steadfast-self-hosting--rapid-rise-personal-cloud/do_more_dns_records.png" alt="your-image-description" style="border: 2px solid grey;" /></p>
+
+<p>It may take some time for these entries to propagate through the internet buy once they do, you should be able to use dig to confirm that DNS is correctly configured:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>dave@driver:/tmp$ dig @1.1.1.1 +nocmd traefik.cgull.tech  +noall +answer
+traefik.cgull.tech.     43200   IN      CNAME   cgull.tech.
+cgull.tech.             1800    IN      A       71.212.123.198
+dave@driver:/tmp$
+</code></pre></div></div>
+
+<p>These DNS entries are enough to direct traffic to your public facing home internet router.   To get to the server will require a port forwarding rule on the router. All traffic to the server goes through https so port 443 needs to be forwarded:</p>
+
+<p><img src="/assets/2024-08-12-walkthrough---steadfast-self-hosting--rapid-rise-personal-cloud/port_forward.png" alt="your-image-description" style="border: 2px solid grey;" /></p>
+
+<p>The Steadfast services are accessed through a “reverse proxy service” called “traefik”.    Once the DNS records and port forwarding rules are in place, you should be able to log in to the mario_server and start the traefik service.   Steadfast supplies a script on the server, “dc” which can be used to interact with services through docker ( see the “Start Services” and “Start reverse proxy” sections in the Steadfast book for details ) :</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>dave@driver:/tmp$ ssh mario_server
+Welcome to Ubuntu 24.04 LTS (GNU/Linux 6.8.0-40-generic x86_64)
+
+ * Documentation:  https://help.ubuntu.com
+ * Management:     https://landscape.canonical.com
+ * Support:        https://ubuntu.com/pro
+
+This system has been minimized by removing packages and content that are
+not required on a system that users do not log into.
+
+To restore this content, you can run the 'unminimize' command.
+Last login: Sun Aug 11 13:47:41 2024 from 192.168.8.148
+dave@demoserver:~$ ps -ef | grep traef
+dave        2791    2781  0 13:49 pts/0    00:00:00 grep --color=auto traef
+dave@demoserver:~$ dc traefik up -d
++ sudo docker compose --file /root/ops/traefik/compose.yml up -d
+[+] Running 1/2
+ ⠼ Network traefik_default            Created                                                                                                                                                                0.4s
+ ✔ Container traefik-reverse-proxy-1  Started                                                                                                                                                                0.3s
+dave@demoserver:~$ ps -ef | grep traef
+root        2965    2945  9 13:49 ?        00:00:00 traefik traefik --api.insecure=true --providers.docker=true --providers.docker.network=traefik_default --providers.docker.exposedbydefault=false --accesslog=false --log.level=INFO --entrypoints.web.address=:80 --entrypoints.websecure.address=:443 --entrypoints.websecure.http3 --entrypoints.web.http.redirections.entrypoint.scheme=https --entrypoints.web.http.redirections.entrypoint.to=websecure --certificatesresolvers.myresolver.acme.dnschallenge=true --certificatesresolvers.myresolver.acme.dnschallenge.provider=digitalocean --certificatesresolvers.myresolver.acme.email=bhivedotlive@gmail.com --certificatesresolvers.myresolver.acme.storage=/etc/traefik/acme.json --global.checknewversion=false --global.sendanonymoususage=false
+dave        3019    2781  0 13:49 pts/0    00:00:00 grep --color=auto traef
+dave@demoserver:~$
+</code></pre></div></div>
+
+<p>Once the service is running, you can use “https://traefik.cgull.tech” to access the gui through a browser on the same LAN as the server.
+Note the icon to the left of the traefik.cgull.tech URL indicating that the connection is secure.   This confirms that the automatic creation of the Security Certificate succeeded.</p>
+
+<p><img src="/assets/2024-08-12-walkthrough---steadfast-self-hosting--rapid-rise-personal-cloud/traefik.png" alt="your-image-description" style="border: 2px solid grey;" /></p>
+
+<p>Once traefik starts, other services can also be started in the same way.   For example, nextcloud can be started as follows:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>dave@demoserver:~$ dc nextcloud up -d
++ sudo docker compose --file /root/ops/nextcloud/compose.yml up -d
+[+] Running 3/4
+ ⠧ Network nextcloud            Created                                                                                                                                                                      0.8s
+ ✔ Container nextcloud-redis-1  Started                                                                                                                                                                      0.7s
+ ✔ Container nextcloud-db-1     Started                                                                                                                                                                      0.6s
+ ✔ Container nextcloud-app-1    Started      
+</code></pre></div></div>
+
+<p>Once the nextcloud service is running, it can be accessed in the local lan through “https://cloud.cgull.tech”</p>
+
+<p><img src="/assets/2024-08-12-walkthrough---steadfast-self-hosting--rapid-rise-personal-cloud/nextcloud.png" alt="your-image-description" style="border: 2px solid grey;" /></p>
+
+<p>The DNS entries are enough to allow access to these services from anywhere on the net but the Steadfast configuration includes a filter, “lan-only”, which limits internet connections to the local LAN.   This filter is enabled on a per service basis but can be removed.   To do this, remove “lan-only” from the appropriate compose.yml file (as shown below for nextcloud) and run the provision.sh script again as described in the “Allow WAN access” section of the Steadfast book.</p>
+
+<p>Diffs show “lan-only” removed from compose.yml (on admin machine):</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>dave@driver:~/shb$ git diff
+diff --git a/mario/ansible/roles/services/templates/ops/nextcloud/compose.yml b/mario/ansible/roles/services/templates/ops/nextcloud/compose.yml
+index 496ca7a..5335d61 100644
+--- a/mario/ansible/roles/services/templates/ops/nextcloud/compose.yml
++++ b/mario/ansible/roles/services/templates/ops/nextcloud/compose.yml
+@@ -18,7 +18,7 @@ services:
+       - "traefik.http.routers.nc-https.entrypoints=websecure"
+       - "traefik.http.routers.nc-https.rule=Host(`cloud.{{ lookup('env', 'MARIO_DOMAIN_NAME')  }}`)"
+       - "traefik.http.routers.nc-https.tls.certresolver=myresolver"
+-      - "traefik.http.routers.nc-https.middlewares=nc-head,nc-redir,lan-only"
++      - "traefik.http.routers.nc-https.middlewares=nc-head,nc-redir"
+       - "traefik.http.middlewares.nc-head.headers.stsSeconds=155520011"
+       - "traefik.http.middlewares.nc-head.headers.stsIncludeSubdomains=true"
+       - "traefik.http.middlewares.nc-head.headers.stsPreload=true"
+dave@driver:~/shb$
+
+</code></pre></div></div>
+
+<p>After making this change and running provision.sh, “https://cloud.cgull.tech” should be accessible from the general internet.</p>]]></content><author><name></name></author><summary type="html"><![CDATA[The book “Steadfast Self-Hosting: Rapid-Rice Personal Cloud” is a guide to setting up your own personal home server. I found the book to be easy to read, educational, and entertaining.]]></summary></entry><entry><title type="html">Dynamic DNS for DigitalOcean</title><link href="/2024/08/09/dynamic-dns-for-digitalocean.html" rel="alternate" type="text/html" title="Dynamic DNS for DigitalOcean" /><published>2024-08-09T20:41:22-07:00</published><updated>2024-08-09T20:41:22-07:00</updated><id>/2024/08/09/dynamic-dns-for-digitalocean</id><content type="html" xml:base="/2024/08/09/dynamic-dns-for-digitalocean.html"><![CDATA[<p><a href="https://github.com/dc25/digitalocean_dyndns.git">Here</a> is a bash script to keep a DigitalOcean DNS A record pointed back at your home internet.   It depends on curl and jq, both of which should be available through most package managers if you don’t have them installed already.</p>
+
+<p>To use it, you will need a domain that uses Digitalocean name servers and a Digitalocean API token.   <a href="https://docs.digitalocean.com/products/networking/dns/details/pricing/">Per DigitalOcean</a>, this functionality is avaliable at no cost.   I did have to give them credit card information.</p>
+
+<p>The script expects the domain whose “A” record will be updated to be in the file “DIGITALOCEAN_DOMAIN” and the API token to be in the file “DIGITALOCEAN_TOKEN”.</p>
+
+<p>The script expects 1 or 0 arguments on the command line. If 1 argument is given, the the IP address given as command line argument will be saved in the “A” record.  Otherwise the script will use “curl” to retrieve the public IP address:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>dave@driver:/tmp$ curl -4 icanhazip.com 2&gt; /dev/null
+50.245.151.169
+dave@driver:/tmp$
+</code></pre></div></div>
+
+<p>If the script completes successfully, it will save its IP value.   The next time the script runs, it will check the current IP value against the previous IP value and exit if they are the same.  This prevents repeat calls to the DigitalOcean API with the same values.</p>
+
+<p>To use the script, clone the repository, create the files DIGITALOCEAN_DOMAIN and DIGITALOCEAN_TOKEN and run the script:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>dave@driver:~$
+dave@driver:~$ git clone https://github.com/dc25/digitalocean_dyndns.git
+Cloning into 'digitalocean_dyndns'...
+remote: Enumerating objects: 9, done.
+remote: Counting objects: 100% (9/9), done.
+remote: Compressing objects: 100% (8/8), done.
+remote: Total 9 (delta 3), reused 5 (delta 0), pack-reused 0
+Receiving objects: 100% (9/9), done.
+Resolving deltas: 100% (3/3), done.
+dave@driver:~$ cd digitalocean_dyndns/
+dave@driver:~/digitalocean_dyndns$
+dave@driver:~/digitalocean_dyndns$ ls
+dyndns.bash
+dave@driver:~/digitalocean_dyndns$  cat &gt; DIGITALOCEAN_DOMAIN
+cgull.tech
+dave@driver:~/digitalocean_dyndns$ cat &gt; DIGITALOCEAN_TOKEN
+dop_v1_f5b0685c95f896e55e64df50d2f108704c391c34cda8310ad229eede609ba928
+dave@driver:~/digitalocean_dyndns$
+dave@driver:~/digitalocean_dyndns$ ./dyndns.bash
+deleting existing A record for cgull.tech
+adding new A record for cgull.tech with value : 50.245.151.169
+update worked so saving arguments "50.245.151.169" in /home/dave/repeat_check/dyndns.bash
+dave@driver:~/digitalocean_dyndns$
+dave@driver:~/digitalocean_dyndns$ ./dyndns.bash
+previous update was also with argument: "50.245.151.169" so exiting now to avoid duplicate work.
+dave@driver:~/digitalocean_dyndns$
+</code></pre></div></div>
+
+<p>Use cron to automate running on regular basis (once per minute shown in transcript below):</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>dave@driver:/tmp$ crontab -l
+* *  * * *   /home/dave/digitalocean_dyndns/dyndns.bash &gt; /tmp/dyndns.bash.out
+dave@driver:/tmp$ date
+Mon Aug 12 09:50:24 AM PDT 2024
+dave@driver:/tmp$ ls dyndns.bash.out
+ls: cannot access 'dyndns.bash.out': No such file or directory
+dave@driver:/tmp$ date
+Mon Aug 12 09:51:09 AM PDT 2024
+dave@driver:/tmp$ ll dyndns.bash.out
+-rw-rw-r-- 1 dave dave 195 Aug 12 09:51 dyndns.bash.out
+dave@driver:/tmp$ cat !$
+cat dyndns.bash.out
+deleting existing A record for cgull.tech
+adding new A record for cgull.tech with value : 50.245.151.169
+update worked so saving arguments "50.245.151.169" in /home/dave/repeat_check/dyndns.bash
+dave@driver:/tmp$
+dave@driver:/tmp$ date
+Mon Aug 12 09:52:07 AM PDT 2024
+dave@driver:/tmp$ cat dyndns.bash.out
+previous update was also with argument: "50.245.151.169" so exiting now to avoid duplicate work.
+dave@driver:/tmp$
+</code></pre></div></div>]]></content><author><name></name></author><summary type="html"><![CDATA[Here is a bash script to keep a DigitalOcean DNS A record pointed back at your home internet. It depends on curl and jq, both of which should be available through most package managers if you don’t have them installed already.]]></summary></entry></feed>
