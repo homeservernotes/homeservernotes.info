@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>Jekyll quickstart | Home Server Group</title>
+<meta name="generator" content="Jekyll v4.4.1" />
+<meta property="og:title" content="Jekyll quickstart" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="In the Septemeber 5 meeting we did a walkthrough of how to build a simple website with jekyll. This post goes through that process. As a rough overview, the steps are: Update your computer with the necessary utilities (npm, node, some other npm related utilities). Clone the jekyll/minima repository. Prepare the minima repository with the necessary dependencies. Run jekyll to either serve or build the site." />
+<meta property="og:description" content="In the Septemeber 5 meeting we did a walkthrough of how to build a simple website with jekyll. This post goes through that process. As a rough overview, the steps are: Update your computer with the necessary utilities (npm, node, some other npm related utilities). Clone the jekyll/minima repository. Prepare the minima repository with the necessary dependencies. Run jekyll to either serve or build the site." />
+<meta property="og:site_name" content="Home Server Group" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2024-09-06T15:44:26-07:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Jekyll quickstart" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","dateModified":"2024-09-06T15:44:26-07:00","datePublished":"2024-09-06T15:44:26-07:00","description":"In the Septemeber 5 meeting we did a walkthrough of how to build a simple website with jekyll. This post goes through that process. As a rough overview, the steps are: Update your computer with the necessary utilities (npm, node, some other npm related utilities). Clone the jekyll/minima repository. Prepare the minima repository with the necessary dependencies. Run jekyll to either serve or build the site.","headline":"Jekyll quickstart","mainEntityOfPage":{"@type":"WebPage","@id":"/2024/09/06/jekyll-quickstart.html"},"url":"/2024/09/06/jekyll-quickstart.html"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@latest/css/all.min.css">
+  <link rel="stylesheet" href="/assets/css/style.css"><link type="application/atom+xml" rel="alternate" href="/feed.xml" title="Home Server Group" />
+</head>
+<body><header class="site-header">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">Home Server Group</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/about/">About</a></div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Jekyll quickstart</h1>
+    <p class="post-meta"><time class="dt-published" datetime="2024-09-06T15:44:26-07:00" itemprop="datePublished">
+        Sep 6, 2024
+      </time></p>
+  </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <p>In the Septemeber 5 meeting we did a walkthrough of how to build a simple website with jekyll.  This post goes through that process.   As a rough overview, the steps are:</p>
+<ul>
+  <li>Update your computer with the necessary utilities (npm, node, some other npm related utilities).</li>
+  <li>Clone the jekyll/minima repository.</li>
+  <li>Prepare the minima repository with the necessary dependencies.</li>
+  <li>Run jekyll to either serve or build the site.</li>
+</ul>
+
+<p>In more detail:</p>
+
+<h1 id="update-your-computer-as-needed">Update your computer as needed.</h1>
+
+<p>First bring the OS up to date.   I’m using Ubuntu in this example so the package manager is apt.</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>dev@xela:~/workdir$ sudo apt update -y                                                      
+dev@xela:~/workdir$ sudo apt upgrade -y
+</code></pre></div></div>
+
+<p>Install the utilities needed to support jekyll:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>dev@xela:~/workdir$ sudo apt install -y npm ruby-dev ruby-bundler zlib1g-dev
+Reading package lists... Done
+</code></pre></div></div>
+
+<p>Bring npm and node up to the latest versions:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>dev@xela:~/workdir$ sudo npm install -g n
+added 1 package in 279ms
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>dev@xela:~/workdir$ sudo n latest
+  installing : node-v22.8.0
+       mkdir : /usr/local/n/versions/node/22.8.0
+       fetch : https://nodejs.org/dist/v22.8.0/node-v22.8.0-linux-x64.tar.xz
+     copying : node/22.8.0
+   installed : v22.8.0 (with npm 10.8.2)
+
+dev@xela:~/workdir$ hash -r
+dev@xela:~/workdir$ node --version
+v22.8.0
+dev@xela:~/workdir$ npm --version
+10.8.2
+</code></pre></div></div>
+
+<h1 id="clone-the-jekyllminima-repository">Clone the jekyll/minima repository.</h1>
+
+<p>This walkthrough uses jekyll/minima which specifies a basic website but the steps should work with any jekyll site, including the <a href="https://github.com/dc25/belug.us">belug.us lookalike</a> and <a href="https://github.com/homeservernotes/homeservernotes.info">this site itself</a>.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>dev@xela:~/workdir$ git clone git@github.com:jekyll/minima.git
+Cloning into 'minima'...
+</code></pre></div></div>
+
+<h1 id="prepare-the-minima-repository-with-the-necessary-dependencies">Prepare the minima repository with the necessary dependencies:</h1>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>dev@xela:~/workdir/minima$ bundle config path 'vendor/bundle' --local
+dev@xela:~/workdir/minima$ bundle install
+Resolving dependencies...
+Fetching gem metadata from https://rubygems.org/............
+</code></pre></div></div>
+<h1 id="use-jekyll-to-build-and-serve-the-site">Use jekyll to build and serve the site:</h1>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>dev@xela:~/workdir/minima$ bundle exec jekyll serve -H 0.0.0.0
+Configuration file: /home/dev/workdir/minima/_config.yml
+ Theme Config file: /home/dev/workdir/minima/_config.yml
+            Source: /home/dev/workdir/minima
+       Destination: /home/dev/workdir/minima/_site
+ Incremental build: disabled. Enable with --incremental
+      Generating...
+       Jekyll Feed: Generating feed for posts
+                    done in 0.351 seconds.
+ Auto-regeneration: enabled for '/home/dev/workdir/minima'
+    Server address: http://0.0.0.0:4000
+  Server running... press ctrl-c to stop.
+[2024-09-06 22:20:52] ERROR `/favicon.ico' not found.
+^C^C
+</code></pre></div></div>
+
+<h1 id="or-use-jekyll-to-just-build-the-site">Or use jekyll to just build the site:</h1>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>dev@xela:~/workdir/minima$ rm -rf _site/
+dev@xela:~/workdir/minima$ bundle exec jekyll build
+Configuration file: /home/dev/workdir/minima/_config.yml
+ Theme Config file: /home/dev/workdir/minima/_config.yml
+            Source: /home/dev/workdir/minima
+       Destination: /home/dev/workdir/minima/_site
+ Incremental build: disabled. Enable with --incremental
+      Generating...
+       Jekyll Feed: Generating feed for posts
+                    done in 0.446 seconds.
+ Auto-regeneration: disabled. Use --watch to enable.
+dev@xela:~/workdir/minima$ ls -rd _site/
+_site/
+dev@xela:~/workdir/minima$
+</code></pre></div></div>
+<h1 id="view-the-site-in-your-browser">View the site in your browser.</h1>
+
+<p>If you use the “bundle exec jekyll serve -H 0.0.0.0” command shown above you should be able to see the site at port 4000 for any IP address the computer presents.   You can also serve the site with a server of your choice after running “bundle exec jekyll build” (also shown above).  The jekyll/minima site should look something like this:
+<img src="/assets/2024-09-06-jekyll-quickstart/jekyllminima.jpg" alt="your-image-description" style="border: 2px solid grey;" /></p>
+
+<h1 id="configure-as-needed">Configure as needed:</h1>
+
+<p>At this point you can modify the minima content to specify whatever website you want.  This is how the belug.us lookalike was created.  The details of how to do that are beyond the scope of this post.</p>
+
+  </div><a class="u-url" href="/2024/09/06/jekyll-quickstart.html" hidden></a>
+</article>
+
+      </div>
+    </main>
+
+    <div class="page-content">
+      <div class="wrapper">
+        
+    
+<div id="gh-comments">
+    <br/><br/>
+    <h6>COMMENTS</h6>
+    <div id="gh-comments-list"></div>
+</div>
+
+<script src="/js/github-comments.js"> </script>
+
+<script type="text/javascript"> 
+    DoGithubComments ( 
+        "homeservernotes/homeservernotes.info" , 
+        "42" 
+    ); 
+</script>
+
+<noscript>Please enable JavaScript to view comments.</noscript>
+
+
+
+      </div>
+    </div><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col">
+        <p class="feed-subscribe">
+          <a href="/feed.xml">
+            <svg class="svg-icon orange">
+              <path d="M12.8 16C12.8 8.978 7.022 3.2 0 3.2V0c8.777 0 16 7.223 16 16h-3.2zM2.194
+                11.61c1.21 0 2.195.985 2.195 2.196 0 1.21-.99 2.194-2.2 2.194C.98 16 0 15.017 0
+                13.806c0-1.21.983-2.195 2.194-2.195zM10.606
+                16h-3.11c0-4.113-3.383-7.497-7.496-7.497v-3.11c5.818 0 10.606 4.79 10.606 10.607z"
+              />
+            </svg><span>Subscribe</span>
+          </a>
+        </p>
+      </div>
+      <div class="footer-col">
+        <p></p>
+      </div>
+    </div>
+
+    <div class="social-links"><ul class="social-media-list"></ul>
+</div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>

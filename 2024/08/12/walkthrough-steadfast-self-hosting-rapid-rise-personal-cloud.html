@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>walkthrough: “Steadfast Self-Hosting: Rapid-Rise Personal Cloud” | Home Server Group</title>
+<meta name="generator" content="Jekyll v4.4.1" />
+<meta property="og:title" content="walkthrough: “Steadfast Self-Hosting: Rapid-Rise Personal Cloud”" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="The book “Steadfast Self-Hosting: Rapid-Rice Personal Cloud” is a guide to setting up your own personal home server. I found the book to be easy to read, educational, and entertaining." />
+<meta property="og:description" content="The book “Steadfast Self-Hosting: Rapid-Rice Personal Cloud” is a guide to setting up your own personal home server. I found the book to be easy to read, educational, and entertaining." />
+<meta property="og:site_name" content="Home Server Group" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2024-08-12T12:59:52-07:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="walkthrough: “Steadfast Self-Hosting: Rapid-Rise Personal Cloud”" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","dateModified":"2024-08-12T12:59:52-07:00","datePublished":"2024-08-12T12:59:52-07:00","description":"The book “Steadfast Self-Hosting: Rapid-Rice Personal Cloud” is a guide to setting up your own personal home server. I found the book to be easy to read, educational, and entertaining.","headline":"walkthrough: “Steadfast Self-Hosting: Rapid-Rise Personal Cloud”","mainEntityOfPage":{"@type":"WebPage","@id":"/2024/08/12/walkthrough-steadfast-self-hosting-rapid-rise-personal-cloud.html"},"url":"/2024/08/12/walkthrough-steadfast-self-hosting-rapid-rise-personal-cloud.html"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@latest/css/all.min.css">
+  <link rel="stylesheet" href="/assets/css/style.css"><link type="application/atom+xml" rel="alternate" href="/feed.xml" title="Home Server Group" />
+</head>
+<body><header class="site-header">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">Home Server Group</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/about/">About</a></div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">walkthrough: &quot;Steadfast Self-Hosting: Rapid-Rise Personal Cloud&quot;</h1>
+    <p class="post-meta"><time class="dt-published" datetime="2024-08-12T12:59:52-07:00" itemprop="datePublished">
+        Aug 12, 2024
+      </time></p>
+  </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <p>The book “Steadfast Self-Hosting: Rapid-Rice Personal Cloud” is a guide to setting up your own personal home server.  I found the book to be easy to read, educational, and entertaining.</p>
+
+<p>The book has a <a href="https://selfhostbook.com">companion website</a> where you can learn more about the book and buy it if you want to.   I purchased the book and I encourage you to also.</p>
+
+<p>The rest of this post is a summary of my experience with the home server setup process outlined in the book.</p>
+
+<p>The server that I used was a repurposed Dell Latitude E5430 with 16GB RAM, 2TB SSD and an I5 processor, running Ubuntu Server 24.04 (installed from ISO just a couple of days ago). The book also calls for an “admin machine”.  For this I used a VirtualBox virtual machine running Ubuntu Desktop 24.04 under a Windows host.  The purpose of the admin machine is to remotely configure the server.</p>
+
+<p>The Steadfast system expects you to have registered a DNS domain and chosen a DNS “provider” for that domain. The domain that I purchased for this post was “cgull.tech” and I chose DNS provider, DigitalOcean, which provides the necessary nameservers and API access at no cost.   Thank you, DigitalOcean</p>
+
+<p>After this process is complete the end result should be a server with the services, Nextcloud, Jellyfin, Wallabag, Watchtower, and Scratch installed.  Local (LAN) access to these services is enabled by default.  General internet access can be enabled for any/all of these services.</p>
+
+<h1 id="setting-up-the-domain-cgulltech">Setting up the domain (cgull.tech).</h1>
+
+<p>According to the Steadfast book, the Steadfast tools also work with these DNS providers: “Duck DNS” “Namecheap”, “DigitalOcean”, and “Route 53”.   The screenshots below walk through the process of setting up DigitalOcean as a DNS provider.</p>
+
+<p>From the DigitalOcean website, create an API access token.   Record this for later use:
+<img src="/assets/2024-08-12-walkthrough---steadfast-self-hosting--rapid-rise-personal-cloud/do_create_token.png" alt="your-image-description" style="border: 2px solid grey;" /></p>
+
+<p>Also from the DigitalOcean website, Go to “Manage DNS on DigitalOcean” (shown below);
+<img src="/assets/2024-08-12-walkthrough---steadfast-self-hosting--rapid-rise-personal-cloud/do_manage_dns.png" alt="your-image-description" style="border: 2px solid grey;" /></p>
+
+<p>Enter your domain (cgull.tech in my case).
+<img src="/assets/2024-08-12-walkthrough---steadfast-self-hosting--rapid-rise-personal-cloud/do_add_domain.png" alt="your-image-description" style="border: 2px solid grey;" /></p>
+
+<p>DigitalOcean initially creates three NS records.  These will also need to be entered at your registrar (where you purchased the domain) :
+<img src="/assets/2024-08-12-walkthrough---steadfast-self-hosting--rapid-rise-personal-cloud/do_dns_records.png" alt="your-image-description" style="border: 2px solid grey;" /></p>
+
+<p>At your DNS registrar enter the same nameservers shown in NS records by the DNS provider (DigitalOcean).   The registrar that I used was ionos.com so I had to leave DigitalOcean and log in to ionos.com:
+<img src="/assets/2024-08-12-walkthrough---steadfast-self-hosting--rapid-rise-personal-cloud/ionos_custom_name_servers.png" alt="your-image-description" style="border: 2px solid grey;" /></p>
+
+<p>After this is done “dig” can be used on the command line to verify that the name servers have been updated :</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>dave@driver:/tmp$ dig  +nocmd cgull.tech ns +noall +answer
+cgull.tech.             1644    IN      NS      ns1.digitalocean.com.
+cgull.tech.             1644    IN      NS      ns3.digitalocean.com.
+cgull.tech.             1644    IN      NS      ns2.digitalocean.com.
+</code></pre></div></div>
+
+<p>This DNS setup is required for the Steadfast setup script (provision.sh) to generate encryption certificates and is the bare minimum DNS configuration needed for the setup script to succeed.
+Later in the process some additional DNS records will be added to direct internet traffic to the server.</p>
+
+<h1 id="setting-up-the-admin-machine">Setting up the admin machine.</h1>
+
+<p>Note that this is the admin machine - not the server.</p>
+
+<p>The following changes to /etc/hosts and .ssh configuration can be found in the “SSH setup” section in the Steadfast book.</p>
+
+<p>The Steadfast tools use the name, “mario_server” to refer to the server.  This is configured by editing /etc/hosts on the admin machine.  I use git to record changes made to my /etc directory.   In the transcript below I’m using git to show changes made in /etc/hosts.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>root@driver:/etc# git diff hosts
+root@driver:/etc#
+root@driver:/etc# cat hosts
+127.0.0.1 localhost
+127.0.1.1 driver
+
+# The following lines are desirable for IPv6 capable hosts
+::1     ip6-localhost ip6-loopback
+fe00::0 ip6-localnet
+ff00::0 ip6-mcastprefix
+ff02::1 ip6-allnodes
+ff02::2 ip6-allrouters
+root@driver:/etc# cat &gt;&gt; hosts
+
+# Adding the following per Steadfast self hosting book:
+192.168.8.247  mario_server
+root@driver:/etc# git diff hosts
+diff --git a/hosts b/hosts
+index 974c68f..53a31d7 100644
+--- a/hosts
++++ b/hosts
+@@ -7,3 +7,6 @@ fe00::0 ip6-localnet
+ ff00::0 ip6-mcastprefix
+ ff02::1 ip6-allnodes
+ ff02::2 ip6-allrouters
++
++# Adding the following per Steadfast self hosting book:
++192.168.8.247  mario_server
+root@driver:/etc# cat hosts
+127.0.0.1 localhost
+127.0.1.1 driver
+
+# The following lines are desirable for IPv6 capable hosts
+::1     ip6-localhost ip6-loopback
+fe00::0 ip6-localnet
+ff00::0 ip6-mcastprefix
+ff02::1 ip6-allnodes
+ff02::2 ip6-allrouters
+
+# Adding the following per Steadfast self hosting book:
+192.168.8.247  mario_server
+root@driver:/etc#
+</code></pre></div></div>
+
+<p>Use ping to confirm that the server is accessible:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>dave@driver:/etc$
+dave@driver:/etc$ ping mario_server
+PING mario_server (192.168.8.247) 56(84) bytes of data.
+64 bytes from mario_server (192.168.8.247): icmp_seq=1 ttl=64 time=3.76 ms
+64 bytes from mario_server (192.168.8.247): icmp_seq=2 ttl=64 time=5.15 ms
+64 bytes from mario_server (192.168.8.247): icmp_seq=3 ttl=64 time=3.59 ms
+^C
+--- mario_server ping statistics ---
+3 packets transmitted, 3 received, 0% packet loss, time 2005ms
+rtt min/avg/max/mdev = 3.589/4.165/5.150/0.699 ms
+dave@driver:/etc$
+</code></pre></div></div>
+
+<p>Configure ssh to to access the server as the appropriate user.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>dave@driver:~$ cd .ssh
+dave@driver:~/.ssh$ ls
+authorized_keys  id_rsa  id_rsa.pub
+dave@driver:~/.ssh$ cat &gt; config
+Host mario_server
+  User dave
+dave@driver:~/.ssh$
+dave@driver:~/.ssh$ ssh mario_server
+The authenticity of host 'mario_server (192.168.8.247)' can't be established.
+ED25519 key fingerprint is SHA256:MV3EfXxBMcLuCZRsGkOHJdjaUUrwFZMJB567+wiRRp4.
+This key is not known by any other names.
+Are you sure you want to continue connecting (yes/no/[fingerprint])? yes
+Warning: Permanently added 'mario_server' (ED25519) to the list of known hosts.
+dave@mario_server's password:
+Welcome to Ubuntu 24.04 LTS (GNU/Linux 6.8.0-39-generic x86_64)
+
+ * Documentation:  https://help.ubuntu.com
+ * Management:     https://landscape.canonical.com
+ * Support:        https://ubuntu.com/pro
+
+This system has been minimized by removing packages and content that are
+not required on a system that users do not log into.
+
+To restore this content, you can run the 'unminimize' command.
+Last login: Mon Aug  5 22:23:39 2024 from 192.168.8.146
+dave@demoserver:~$
+</code></pre></div></div>
+
+<p>Copy the public half of your ssh-key pair to the server to enable login without a password.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>dave@driver:~$ ssh-copy-id mario_server
+/usr/bin/ssh-copy-id: INFO: Source of key(s) to be installed: "/home/dave/.ssh/id_rsa.pub"
+/usr/bin/ssh-copy-id: INFO: attempting to log in with the new key(s), to filter out any that are already installed
+/usr/bin/ssh-copy-id: INFO: 1 key(s) remain to be installed -- if you are prompted now it is to install the new keys
+dave@mario_server's password:
+
+Number of key(s) added: 1
+
+Now try logging into the machine, with:   "ssh 'mario_server'"
+and check to make sure that only the key(s) you wanted were added.
+
+dave@driver:~$ ssh mario_server
+Welcome to Ubuntu 24.04 LTS (GNU/Linux 6.8.0-39-generic x86_64)
+
+ * Documentation:  https://help.ubuntu.com
+ * Management:     https://landscape.canonical.com
+ * Support:        https://ubuntu.com/pro
+
+This system has been minimized by removing packages and content that are
+not required on a system that users do not log into.
+
+To restore this content, you can run the 'unminimize' command.
+Last login: Mon Aug  5 22:33:17 2024 from 192.168.8.155
+dave@demoserver:~$
+</code></pre></div></div>
+
+<h1 id="provisioning-the-server">Provisioning the server.</h1>
+
+<p>The following process can be found in the “Provision server” section in the Steadfast book.</p>
+
+<p>The first thing to do is to clone the source repo from github:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>dave@driver:~$ git clone  https://github.com/meonkeys/shb.git
+Cloning into 'shb'...
+remote: Enumerating objects: 4726, done.
+remote: Counting objects: 100% (1076/1076), done.
+remote: Compressing objects: 100% (318/318), done.
+remote: Total 4726 (delta 763), reused 1047 (delta 744), pack-reused 3650
+Receiving objects: 100% (4726/4726), 21.86 MiB | 893.00 KiB/s, done.
+Resolving deltas: 100% (3160/3160), done.
+dave@driver
+</code></pre></div></div>
+
+<p>The provision script depends on ansible so install ansible:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>dave@driver:~/shb/mario/ansible$ sudo apt install ansible
+Reading package lists... 
+</code></pre></div></div>
+
+<p>Run the provision script.    It creates a config file to be filled out.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>dave@driver:~/shb/mario/ansible$ ./provision.sh
+You don't have a config file. I'll create one for you now.
+
+Please edit '/home/dave/shb/mario/ansible/config' and re-run this script.
+dave@driver:~/shb/mario/ansible$
+</code></pre></div></div>
+
+<p>So far, no changes have been made on the server.  The provision.sh script needs some parameters to be set in the config file (as called for in the previous transcript).</p>
+
+<h1 id="configuration">Configuration</h1>
+
+<p>I had to set 7 variables in the config file.    The “DO_AUTH_TOKEN” came from DigitalOcean (as shown earlier in this post).</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code># Specify your DNS provider here.
+# Must be ONE of namecheap, digitalocean, route53, or duckdns.
+# This and the corresponding provider-specific variables below are only used for directly manipulating DNS records to pass the DNS challenge for obtaining HTTPS encryption certs.
+export DNS_API_PROVIDER='digitalocean'
+
+### DigitalOcean API credentials ###
+# If you specified digitalocean for DNS_API_PROVIDER above, enter real values in this section. Otherwise leave blank.
+export DO_AUTH_TOKEN='dop_v1_5ad0fe8761a27e996c249999999999999999999999d70874fabc5c5a64482eef'
+
+# Notification email for certificate errors / expirations.
+# Use a value here matching what you use with your DNS API provider.
+# You may receive emails from Let's Encrypt at this address.
+export DNS_RESOLVER_EMAIL='example@example.com'
+
+# A domain name you own, or at least one you control.
+# Services will be named using subdomains, e.g. wallabag.example.com, jellyfin.example.com
+# Note: domain names are not case-sensitive.
+# Warning: Changing this later may be difficult.
+export MARIO_DOMAIN_NAME='cgull.tech'
+
+# Required to squelch a Nextcloud warning.
+# Pick your code from https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2#Officially_assigned_code_elements .
+# See https://docs.nextcloud.com/server/stable/admin_manual/configuration_server/config_sample_php_parameters.html?highlight=phone#user-experience
+export DEFAULT_PHONE_REGION='US'
+
+# Your server's time zone.
+# Must correspond with an available timezone data file in /usr/share/zoneinfo on your server.
+# For example, if you are in Seattle, use 'America/Los_Angeles', short for /usr/share/zoneinfo/America/Los_Angeles
+# Note that 'US/Pacific' is no longer valid.
+# Leaving this is 'Etc/Zulu' is fine too.
+export TZ='America/Los_Angeles'
+
+# Value to use for the `lan-only` middleware, which is enabled by default.
+# This is a range of IP addresses in CIDR notation.
+# See https://en.wikipedia.org/wiki/CIDR#CIDR_notation
+# The default value assumes LAN addresses match 192.168.1.*
+export LAN_ONLY_ALLOWED='192.168.8.0/24'
+
+</code></pre></div></div>
+<p>With the config file filled out, run provision.sh again.  The “BECOME” password is your password on the server to be provisioned and should only be prompted for one time.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>dave@driver:~/shb/mario/ansible$ ./provision.sh
+BECOME password:
+
+PLAY [all] *******************************************************************************************************************************************************************************************************
+
+TASK [base : Configure apt cache] ********************************************************************************************************************************************************************************
+ok: [mario_server]
+
+TASK [base : Install packages] ***********************************************************************************************************************************************************************************
+changed: [mario_server]
+
+TASK [base : Set timezone] ***************************************************************************************************************************************************************************************
+[WARNING]: Module remote_tmp /root/.ansible/tmp did not exist and was created with a mode of 0700, this may cause issues when running as another user. To avoid this, create the remote_tmp dir with the correct
+permissions manually
+changed: [mario_server]
+
+TASK [base : Enable UFW] *****************************************************************************************************************************************************************************************
+changed: [mario_server]
+
+TASK [base : Disable logging] ************************************************************************************************************************************************************************************
+changed: [mario_server]
+
+TASK [base : Allow SSH] ******************************************************************************************************************************************************************************************
+changed: [mario_server]
+
+TASK [base : Allow insecure HTTP traffic] ************************************************************************************************************************************************************************
+changed: [mario_server]
+
+TASK [base : Allow secure HTTP traffic] **************************************************************************************************************************************************************************
+changed: [mario_server]
+
+TASK [base : Allow passwordless sudo] ****************************************************************************************************************************************************************************
+changed: [mario_server]
+
+TASK [base : increase UDP read buffer limits] ********************************************************************************************************************************************************************
+changed: [mario_server]
+
+TASK [base : increase UDP write buffer limits] *******************************************************************************************************************************************************************
+changed: [mario_server]
+
+TASK [docker : Install packages] *********************************************************************************************************************************************************************************
+changed: [mario_server]
+
+TASK [docker : Enable service] ***********************************************************************************************************************************************************************************
+ok: [mario_server]
+
+TASK [services : Create root-owned service directories] **********************************************************************************************************************************************************
+changed: [mario_server] =&gt; (item=/data)
+changed: [mario_server] =&gt; (item=/data/nextcloud)
+changed: [mario_server] =&gt; (item=/data/nextcloud/db)
+changed: [mario_server] =&gt; (item=/data/nextcloud/root)
+changed: [mario_server] =&gt; (item=/data/traefik)
+changed: [mario_server] =&gt; (item=/data/traefik/etc)
+changed: [mario_server] =&gt; (item=/data/wallabag)
+changed: [mario_server] =&gt; (item=/root/ops)
+changed: [mario_server] =&gt; (item=/root/ops/jellyfin)
+changed: [mario_server] =&gt; (item=/root/ops/nextcloud)
+changed: [mario_server] =&gt; (item=/root/ops/scratch)
+changed: [mario_server] =&gt; (item=/root/ops/scratch/custom)
+changed: [mario_server] =&gt; (item=/root/ops/traefik)
+changed: [mario_server] =&gt; (item=/root/ops/wallabag)
+changed: [mario_server] =&gt; (item=/root/ops/watchtower)
+
+TASK [services : Process and sync service configs] ***************************************************************************************************************************************************************
+changed: [mario_server] =&gt; (item={'src': 'ops/jellyfin/compose.yml', 'dest': '/root/ops/jellyfin/compose.yml'})
+changed: [mario_server] =&gt; (item={'src': 'ops/nextcloud/compose.yml', 'dest': '/root/ops/nextcloud/compose.yml'})
+changed: [mario_server] =&gt; (item={'src': 'ops/scratch/compose.yml', 'dest': '/root/ops/scratch/compose.yml'})
+changed: [mario_server] =&gt; (item={'src': 'ops/scratch/custom/Dockerfile', 'dest': '/root/ops/scratch/custom/Dockerfile'})
+changed: [mario_server] =&gt; (item={'src': 'ops/scratch/custom/webpack.config.js', 'dest': '/root/ops/scratch/custom/webpack.config.js'})
+changed: [mario_server] =&gt; (item={'src': 'ops/traefik/compose.yml', 'dest': '/root/ops/traefik/compose.yml'})
+changed: [mario_server] =&gt; (item={'src': 'ops/wallabag/compose.yml', 'dest': '/root/ops/wallabag/compose.yml'})
+changed: [mario_server] =&gt; (item={'src': 'ops/watchtower/compose.yml', 'dest': '/root/ops/watchtower/compose.yml'})
+
+TASK [services : Create jellyfin group] **************************************************************************************************************************************************************************
+changed: [mario_server]
+
+TASK [services : Create jellyfin user] ***************************************************************************************************************************************************************************
+changed: [mario_server]
+
+TASK [services : Create jellyfin-owned directories] **************************************************************************************************************************************************************
+ok: [mario_server] =&gt; (item=/data/jellyfin/home)
+changed: [mario_server] =&gt; (item=/data/jellyfin/config)
+
+TASK [services : Create Wallabag-owned directories] **************************************************************************************************************************************************************
+changed: [mario_server] =&gt; (item=/data/wallabag/images)
+changed: [mario_server] =&gt; (item=/data/wallabag/main)
+changed: [mario_server] =&gt; (item=/data/wallabag/main/db)
+
+TASK [services : Create Wallabag db] *****************************************************************************************************************************************************************************
+changed: [mario_server]
+
+TASK [services : Create Nextcloud-owned shared media directories] ************************************************************************************************************************************************
+changed: [mario_server] =&gt; (item=/data/shared/media/video)
+changed: [mario_server] =&gt; (item=/data/shared/media/music)
+
+TASK [services : increase inotify limits] ************************************************************************************************************************************************************************
+changed: [mario_server]
+
+TASK [services : Check if Nextcloud config file exists] **********************************************************************************************************************************************************
+ok: [mario_server]
+
+TASK [services : Install PHP lint script] ************************************************************************************************************************************************************************
+changed: [mario_server]
+
+TASK [services : Add phone region to Nextcloud config] ***********************************************************************************************************************************************************
+skipping: [mario_server]
+
+TASK [services : Define arbitrary maintenance window] ************************************************************************************************************************************************************
+skipping: [mario_server]
+
+TASK [services : Install docker-compose shortcut script] *********************************************************************************************************************************************************
+changed: [mario_server]
+
+TASK [services : Install dc Bash completion] *********************************************************************************************************************************************************************
+changed: [mario_server]
+
+RUNNING HANDLER [base : timedatectl set-timezone] ****************************************************************************************************************************************************************
+changed: [mario_server]
+
+PLAY RECAP *******************************************************************************************************************************************************************************************************
+mario_server               : ok=27   changed=24   unreachable=0    failed=0    skipped=2    rescued=0    ignored=0
+
+dave@driver:~/shb/mario/ansible$
+</code></pre></div></div>
+<h1 id="working-with-services">Working with services</h1>
+
+<p>Two additional DNS records will be required to direct traffic to the server: an “A” record to assign a name to your public IP address (this will use cgull.tech) and a wildcard “CNAME” record to alias subdomains of cgull.tech to cgull.tech.</p>
+
+<p>Use curl as follows to get your public IP address:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>dave@driver:/tmp$ curl -4 icanhazip.com 2&gt; /dev/null
+71.212.123.198
+</code></pre></div></div>
+
+<p><img src="/assets/2024-08-12-walkthrough---steadfast-self-hosting--rapid-rise-personal-cloud/do_more_dns_records.png" alt="your-image-description" style="border: 2px solid grey;" /></p>
+
+<p>It may take some time for these entries to propagate through the internet buy once they do, you should be able to use dig to confirm that DNS is correctly configured:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>dave@driver:/tmp$ dig @1.1.1.1 +nocmd traefik.cgull.tech  +noall +answer
+traefik.cgull.tech.     43200   IN      CNAME   cgull.tech.
+cgull.tech.             1800    IN      A       71.212.123.198
+dave@driver:/tmp$
+</code></pre></div></div>
+
+<p>These DNS entries are enough to direct traffic to your public facing home internet router.   To get to the server will require a port forwarding rule on the router. All traffic to the server goes through https so port 443 needs to be forwarded:</p>
+
+<p><img src="/assets/2024-08-12-walkthrough---steadfast-self-hosting--rapid-rise-personal-cloud/port_forward.png" alt="your-image-description" style="border: 2px solid grey;" /></p>
+
+<p>The Steadfast services are accessed through a “reverse proxy service” called “traefik”.    Once the DNS records and port forwarding rules are in place, you should be able to log in to the mario_server and start the traefik service.   Steadfast supplies a script on the server, “dc” which can be used to interact with services through docker ( see the “Start Services” and “Start reverse proxy” sections in the Steadfast book for details ) :</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>dave@driver:/tmp$ ssh mario_server
+Welcome to Ubuntu 24.04 LTS (GNU/Linux 6.8.0-40-generic x86_64)
+
+ * Documentation:  https://help.ubuntu.com
+ * Management:     https://landscape.canonical.com
+ * Support:        https://ubuntu.com/pro
+
+This system has been minimized by removing packages and content that are
+not required on a system that users do not log into.
+
+To restore this content, you can run the 'unminimize' command.
+Last login: Sun Aug 11 13:47:41 2024 from 192.168.8.148
+dave@demoserver:~$ ps -ef | grep traef
+dave        2791    2781  0 13:49 pts/0    00:00:00 grep --color=auto traef
+dave@demoserver:~$ dc traefik up -d
++ sudo docker compose --file /root/ops/traefik/compose.yml up -d
+[+] Running 1/2
+ ⠼ Network traefik_default            Created                                                                                                                                                                0.4s
+ ✔ Container traefik-reverse-proxy-1  Started                                                                                                                                                                0.3s
+dave@demoserver:~$ ps -ef | grep traef
+root        2965    2945  9 13:49 ?        00:00:00 traefik traefik --api.insecure=true --providers.docker=true --providers.docker.network=traefik_default --providers.docker.exposedbydefault=false --accesslog=false --log.level=INFO --entrypoints.web.address=:80 --entrypoints.websecure.address=:443 --entrypoints.websecure.http3 --entrypoints.web.http.redirections.entrypoint.scheme=https --entrypoints.web.http.redirections.entrypoint.to=websecure --certificatesresolvers.myresolver.acme.dnschallenge=true --certificatesresolvers.myresolver.acme.dnschallenge.provider=digitalocean --certificatesresolvers.myresolver.acme.email=bhivedotlive@gmail.com --certificatesresolvers.myresolver.acme.storage=/etc/traefik/acme.json --global.checknewversion=false --global.sendanonymoususage=false
+dave        3019    2781  0 13:49 pts/0    00:00:00 grep --color=auto traef
+dave@demoserver:~$
+</code></pre></div></div>
+
+<p>Once the service is running, you can use “https://traefik.cgull.tech” to access the gui through a browser on the same LAN as the server.
+Note the icon to the left of the traefik.cgull.tech URL indicating that the connection is secure.   This confirms that the automatic creation of the Security Certificate succeeded.</p>
+
+<p><img src="/assets/2024-08-12-walkthrough---steadfast-self-hosting--rapid-rise-personal-cloud/traefik.png" alt="your-image-description" style="border: 2px solid grey;" /></p>
+
+<p>Once traefik starts, other services can also be started in the same way.   For example, nextcloud can be started as follows:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>dave@demoserver:~$ dc nextcloud up -d
++ sudo docker compose --file /root/ops/nextcloud/compose.yml up -d
+[+] Running 3/4
+ ⠧ Network nextcloud            Created                                                                                                                                                                      0.8s
+ ✔ Container nextcloud-redis-1  Started                                                                                                                                                                      0.7s
+ ✔ Container nextcloud-db-1     Started                                                                                                                                                                      0.6s
+ ✔ Container nextcloud-app-1    Started      
+</code></pre></div></div>
+
+<p>Once the nextcloud service is running, it can be accessed in the local lan through “https://cloud.cgull.tech”</p>
+
+<p><img src="/assets/2024-08-12-walkthrough---steadfast-self-hosting--rapid-rise-personal-cloud/nextcloud.png" alt="your-image-description" style="border: 2px solid grey;" /></p>
+
+<p>The DNS entries are enough to allow access to these services from anywhere on the net but the Steadfast configuration includes a filter, “lan-only”, which limits internet connections to the local LAN.   This filter is enabled on a per service basis but can be removed.   To do this, remove “lan-only” from the appropriate compose.yml file (as shown below for nextcloud) and run the provision.sh script again as described in the “Allow WAN access” section of the Steadfast book.</p>
+
+<p>Diffs show “lan-only” removed from compose.yml (on admin machine):</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>dave@driver:~/shb$ git diff
+diff --git a/mario/ansible/roles/services/templates/ops/nextcloud/compose.yml b/mario/ansible/roles/services/templates/ops/nextcloud/compose.yml
+index 496ca7a..5335d61 100644
+--- a/mario/ansible/roles/services/templates/ops/nextcloud/compose.yml
++++ b/mario/ansible/roles/services/templates/ops/nextcloud/compose.yml
+@@ -18,7 +18,7 @@ services:
+       - "traefik.http.routers.nc-https.entrypoints=websecure"
+       - "traefik.http.routers.nc-https.rule=Host(`cloud.{{ lookup('env', 'MARIO_DOMAIN_NAME')  }}`)"
+       - "traefik.http.routers.nc-https.tls.certresolver=myresolver"
+-      - "traefik.http.routers.nc-https.middlewares=nc-head,nc-redir,lan-only"
++      - "traefik.http.routers.nc-https.middlewares=nc-head,nc-redir"
+       - "traefik.http.middlewares.nc-head.headers.stsSeconds=155520011"
+       - "traefik.http.middlewares.nc-head.headers.stsIncludeSubdomains=true"
+       - "traefik.http.middlewares.nc-head.headers.stsPreload=true"
+dave@driver:~/shb$
+
+</code></pre></div></div>
+
+<p>After making this change and running provision.sh, “https://cloud.cgull.tech” should be accessible from the general internet.</p>
+
+
+  </div><a class="u-url" href="/2024/08/12/walkthrough-steadfast-self-hosting-rapid-rise-personal-cloud.html" hidden></a>
+</article>
+
+      </div>
+    </main>
+
+    <div class="page-content">
+      <div class="wrapper">
+        
+    
+<div id="gh-comments">
+    <br/><br/>
+    <h6>COMMENTS</h6>
+    <div id="gh-comments-list"></div>
+</div>
+
+<script src="/js/github-comments.js"> </script>
+
+<script type="text/javascript"> 
+    DoGithubComments ( 
+        "homeservernotes/homeservernotes.info" , 
+        "34" 
+    ); 
+</script>
+
+<noscript>Please enable JavaScript to view comments.</noscript>
+
+
+
+      </div>
+    </div><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col">
+        <p class="feed-subscribe">
+          <a href="/feed.xml">
+            <svg class="svg-icon orange">
+              <path d="M12.8 16C12.8 8.978 7.022 3.2 0 3.2V0c8.777 0 16 7.223 16 16h-3.2zM2.194
+                11.61c1.21 0 2.195.985 2.195 2.196 0 1.21-.99 2.194-2.2 2.194C.98 16 0 15.017 0
+                13.806c0-1.21.983-2.195 2.194-2.195zM10.606
+                16h-3.11c0-4.113-3.383-7.497-7.496-7.497v-3.11c5.818 0 10.606 4.79 10.606 10.607z"
+              />
+            </svg><span>Subscribe</span>
+          </a>
+        </p>
+      </div>
+      <div class="footer-col">
+        <p></p>
+      </div>
+    </div>
+
+    <div class="social-links"><ul class="social-media-list"></ul>
+</div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>
