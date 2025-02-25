@@ -19,7 +19,7 @@ The first time you run the hello-world test it will download an "image" which is
 
 To see a list of all the cached images, run "sudo docker images" on the command line.   To see a list of all running containers, run "sudo docker ps".   If you do that after running the hello-world test you should see one cached image and no running containers (because the test is no longer running).
 
-An optional argument to "sudo docker run" is the executable to be run inside the container.  So, for example, to run a shell, to run a shell in a container you could type "docker run -i -t <image-name> bash" assuming the named image includes ("contains") bash.  The "-i -t" arguments tell docker that the container needs to be interactive ( -i ) and supply a terminal ( -t ).
+An optional argument to "sudo docker run" is the executable to be run inside the container.  So, for example, to run a shell, to run a shell in a container you could type "docker run -i -t \<image-name\> bash" assuming the named image includes ("contains") bash.  The "-i -t" arguments tell docker that the container needs to be interactive ( -i ) and supply a terminal ( -t ).
 
 If you run "sudo docker run -i -t ubuntu bash" you will get a shell prompt that gives you a way to see what is inside the container.   If you leave the new shell running and (in a different terminal) run "sudo docker ps" you will see the running container.   Once you exit the shell running in the container, "sudo docker ps" will no longer show that container because it is no longer running.
 
