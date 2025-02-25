@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>Running a private docker repository with access through tailscale | Home Server Group</title>
+<meta name="generator" content="Jekyll v4.4.1" />
+<meta property="og:title" content="Running a private docker repository with access through tailscale" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="This a summary of the steps I went through to get a private container (docker/podman) repository running on a home server with access through URL’s provided by tailscale. There’s nothing original written here but it took me a while to figure it out and I wanted to collect it in one place." />
+<meta property="og:description" content="This a summary of the steps I went through to get a private container (docker/podman) repository running on a home server with access through URL’s provided by tailscale. There’s nothing original written here but it took me a while to figure it out and I wanted to collect it in one place." />
+<meta property="og:site_name" content="Home Server Group" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2025-02-14T17:02:36-08:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Running a private docker repository with access through tailscale" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","dateModified":"2025-02-14T17:02:36-08:00","datePublished":"2025-02-14T17:02:36-08:00","description":"This a summary of the steps I went through to get a private container (docker/podman) repository running on a home server with access through URL’s provided by tailscale. There’s nothing original written here but it took me a while to figure it out and I wanted to collect it in one place.","headline":"Running a private docker repository with access through tailscale","mainEntityOfPage":{"@type":"WebPage","@id":"/2025/02/14/running-a-private-docker-repository-with-access-through-tailscale.html"},"url":"/2025/02/14/running-a-private-docker-repository-with-access-through-tailscale.html"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@latest/css/all.min.css">
+  <link rel="stylesheet" href="/assets/css/style.css"><link type="application/atom+xml" rel="alternate" href="/feed.xml" title="Home Server Group" />
+</head>
+<body><header class="site-header">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">Home Server Group</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/about/">About</a></div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Running a private docker repository with access through tailscale</h1>
+    <p class="post-meta"><time class="dt-published" datetime="2025-02-14T17:02:36-08:00" itemprop="datePublished">
+        Feb 14, 2025
+      </time></p>
+  </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <p>This a summary of the steps I went through to get a private container (docker/podman) repository running on a home server with access through URL’s provided by tailscale.   There’s nothing original written here but it took me a while to figure it out and I wanted to collect it in one place.</p>
+
+<p>I’ve been using docker compose to manage my server so I looked online for a suitable docker-compose.yaml file.   I found one in <a href="https://github.com/wshihadeh/docker-registry">this github repository</a> which I cloned to my local machine.   I changed the volumes for data and certs to map to directories on the host and changed the tls certificate files to files created by me.</p>
+
+<p>The end result looked like this:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>networks:
+  registry:
+    external: false
+
+services:
+
+  registry:
+    container_name: "registry_web"
+    image: registry:2.6
+    ports:
+      - 5000:5000
+    environment:
+      REGISTRY_HTTP_ADDR: :5000
+      REGISTRY_HTTP_TLS_CERTIFICATE: /certs/cert.crt
+      REGISTRY_HTTP_TLS_KEY: /certs/cert.key
+      REGISTRY_STORAGE: filesystem
+      REGISTRY_STORAGE_DELETE_ENABLED: 'true'
+      REGISTRY_STORAGE_FILESYSTEM_ROOTDIRECTORY: /var/lib/registry
+    volumes:
+      - ./data:/var/lib/registry
+      - ./certs:/certs
+      - ./config/config.yml:/etc/docker/registry/config.yml
+    restart: always
+    logging:
+      driver: "json-file"
+      options:
+        "max-size": "10m"
+        "max-file": "5"
+    networks:
+      - registry
+</code></pre></div></div>
+<p>To create the ssl certificate, I used <code class="language-plaintext highlighter-rouge">tailscale cert</code> per <a href="https://tailscale.com/kb/1153/enabling-https">these instructions</a> to create <code class="language-plaintext highlighter-rouge">cert.crt</code> and <code class="language-plaintext highlighter-rouge">cert.key</code></p>
+
+<p>I had to specify <code class="language-plaintext highlighter-rouge">cert.crt</code> and <code class="language-plaintext highlighter-rouge">cert.key</code> in the docker-compose file (see above).</p>
+
+<p>Now, after running <code class="language-plaintext highlighter-rouge">docker compose up</code> in the directory containing the compose file, I can tag local images with the tailscale url for the server and then push them to the server.   An image that resides on the server can be run with either podman or docker.</p>
+
+<p>To run tailscale on the server I use <code class="language-plaintext highlighter-rouge">sudo tailscale up --accept-dns=false</code> to avoid the clever tailscale DNS tricks.   They <em>are</em> clever and useful but I found them to cause problems when running a docker container on the server that needs to access the internet.   This may or may not affect this particular project but I think it’s a good practice generally.   This is only for the server - clients do need the DNS cleverness.</p>
+
+
+  </div><a class="u-url" href="/2025/02/14/running-a-private-docker-repository-with-access-through-tailscale.html" hidden></a>
+</article>
+
+      </div>
+    </main>
+
+    <div class="page-content">
+      <div class="wrapper">
+        
+    
+<div id="gh-comments">
+    <br/><br/>
+    <h6>COMMENTS</h6>
+    <div id="gh-comments-list"></div>
+</div>
+
+<script src="/js/github-comments.js"> </script>
+
+<script type="text/javascript"> 
+    DoGithubComments ( 
+        "homeservernotes/homeservernotes.info" , 
+        "54" 
+    ); 
+</script>
+
+<noscript>Please enable JavaScript to view comments.</noscript>
+
+
+
+      </div>
+    </div><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col">
+        <p class="feed-subscribe">
+          <a href="/feed.xml">
+            <svg class="svg-icon orange">
+              <path d="M12.8 16C12.8 8.978 7.022 3.2 0 3.2V0c8.777 0 16 7.223 16 16h-3.2zM2.194
+                11.61c1.21 0 2.195.985 2.195 2.196 0 1.21-.99 2.194-2.2 2.194C.98 16 0 15.017 0
+                13.806c0-1.21.983-2.195 2.194-2.195zM10.606
+                16h-3.11c0-4.113-3.383-7.497-7.496-7.497v-3.11c5.818 0 10.606 4.79 10.606 10.607z"
+              />
+            </svg><span>Subscribe</span>
+          </a>
+        </p>
+      </div>
+      <div class="footer-col">
+        <p></p>
+      </div>
+    </div>
+
+    <div class="social-links"><ul class="social-media-list"></ul>
+</div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>
