@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>Browser Access to Proxmox using Tailscale | Home Server Group</title>
+<meta name="generator" content="Jekyll v4.4.1" />
+<meta property="og:title" content="Browser Access to Proxmox using Tailscale" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="A proxmox server serves a browser based GUI for configuration. This gui is accessible on localhost:8006 but there’s no easy way to run a browser on the proxmox machine so we use tailscale to serve that port to a different machine. The tailscale setup process probably doesn’t justify a blog post but I’ll go through it here anyway. I’ll be using the Virtualbox proxmox instance that I created and wrote about a couple of days ago to demonstrate." />
+<meta property="og:description" content="A proxmox server serves a browser based GUI for configuration. This gui is accessible on localhost:8006 but there’s no easy way to run a browser on the proxmox machine so we use tailscale to serve that port to a different machine. The tailscale setup process probably doesn’t justify a blog post but I’ll go through it here anyway. I’ll be using the Virtualbox proxmox instance that I created and wrote about a couple of days ago to demonstrate." />
+<meta property="og:site_name" content="Home Server Group" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2024-04-23T16:32:36-07:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Browser Access to Proxmox using Tailscale" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","dateModified":"2024-04-23T16:32:36-07:00","datePublished":"2024-04-23T16:32:36-07:00","description":"A proxmox server serves a browser based GUI for configuration. This gui is accessible on localhost:8006 but there’s no easy way to run a browser on the proxmox machine so we use tailscale to serve that port to a different machine. The tailscale setup process probably doesn’t justify a blog post but I’ll go through it here anyway. I’ll be using the Virtualbox proxmox instance that I created and wrote about a couple of days ago to demonstrate.","headline":"Browser Access to Proxmox using Tailscale","mainEntityOfPage":{"@type":"WebPage","@id":"/2024/04/23/browser-access-to-proxmox-using-tailscale.html"},"url":"/2024/04/23/browser-access-to-proxmox-using-tailscale.html"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@latest/css/all.min.css">
+  <link rel="stylesheet" href="/assets/css/style.css"><link type="application/atom+xml" rel="alternate" href="/feed.xml" title="Home Server Group" />
+</head>
+<body><header class="site-header">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">Home Server Group</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/about/">About</a></div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Browser Access to Proxmox using Tailscale</h1>
+    <p class="post-meta"><time class="dt-published" datetime="2024-04-23T16:32:36-07:00" itemprop="datePublished">
+        Apr 23, 2024
+      </time></p>
+  </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <p>A proxmox server serves a browser based GUI for configuration.   This gui is accessible on localhost:8006 but there’s no easy way to run a browser on the proxmox machine so we use tailscale to serve that port to a different machine.  The tailscale setup process probably doesn’t justify a blog post but I’ll go through it here anyway.   I’ll be using the Virtualbox proxmox instance that I created and <a href="/2024/04/21/installing-proxmox-on-virtualbox.html">wrote about</a> a couple of days ago to demonstrate.</p>
+
+<hr />
+
+<p>The first step is to create an account at <a href="https://login.tailscale.com/start">tailscale</a> .</p>
+
+<hr />
+
+<p>Next, go to the tailscale <a href="https://tailscale.com/download/linux">linux download</a> page `. <br />
+<img src="/assets/2024-04-23--proxmox-tailscale/Screenshot from 2024-04-23 16-57-12.png" alt="image tooltip here" /></p>
+
+<hr />
+<p>From there copy the shell command that installs tailscale to the shell prompt of your proxmox server and run it:</p>
+
+<p><img src="/assets/2024-04-23--proxmox-tailscale/Screenshot from 2024-04-23 16-58-38.png" alt="image tooltip here" /></p>
+
+<hr />
+<p>This fails with errors related to apt source repositories. <br />
+<img src="/assets/2024-04-23--proxmox-tailscale/Screenshot from 2024-04-23 16-59-19.png" alt="image tooltip here" /></p>
+
+<hr />
+<p>Comment out out the failing lines in /etc/apt/sources.list.d/ceph.list and /etc/apt/sources.list.d/pve-enterprise.list to fix these:
+<img src="/assets/2024-04-23--proxmox-tailscale/Screenshot from 2024-04-23 17-03-54.png" alt="image tooltip here" /></p>
+
+<hr />
+<p>Now the tailscale install should succeed:
+<img src="/assets/2024-04-23--proxmox-tailscale/Screenshot from 2024-04-23 17-06-22.png" alt="image tooltip here" /></p>
+
+<hr />
+<p>Per the instructions at the end of the install output, run “tailscale up”.
+<img src="/assets/2024-04-23--proxmox-tailscale/Screenshot from 2024-04-23 17-07-15.png" alt="image tooltip here" /></p>
+
+<hr />
+<p>After using a browswer to authenticate (per the “tailscale up” output) tailscale will confirm success:
+<img src="/assets/2024-04-23--proxmox-tailscale/Screenshot from 2024-04-23 17-09-57.png" alt="image tooltip here" /></p>
+
+<hr />
+<p>Use the <a href="https://tailscale.com/kb/1242/tailscale-serve">“tailscale serve”</a> command to serve port 8006 by default:
+<img src="/assets/2024-04-23--proxmox-tailscale/Screenshot from 2024-04-23 17-13-20.png" alt="image tooltip here" /></p>
+
+<hr />
+<p>You will also need to install tailscale on any device that you want to access the Proxmox GUI from.</p>
+
+<hr />
+<p>Having installed tailscale both on your proxmox server and on the machine running the browser you should be able to acccess proxmox from anywhere.   Get the appropriate url from your tailscale login.   Having run “tailscale serve”, there is no need for port 8006 to be specified on the url in the browser and the connection established is secure: <br />
+<img src="/assets/2024-04-23--proxmox-tailscale/Screenshot from 2024-04-23 17-20-59.png" alt="image tooltip here" /></p>
+
+<hr />
+<p>The tailscale up state should persist through a reboot.  The “tailscale serve” command will also persist due to use of the “–bg” option.</p>
+
+<hr />
+<p>Using tailscale is not the only option for directing traffic to localhost:8006 on the proxmox server.   However, it’s probably as straightforward as any other technique, at least as secure, should work regardless of how your network is configured.  Also, tailscale allows you to reach your proxmox server from anywhere on the internet.   That’s not so useful if you’re running your proxmox host on a virtual machine that is running on your laptop (as mine is) but if your proxmox server is running on a physical server connected to your home network, then it might be useful to manage it from a remote location.</p>
+
+  </div><a class="u-url" href="/2024/04/23/browser-access-to-proxmox-using-tailscale.html" hidden></a>
+</article>
+
+      </div>
+    </main>
+
+    <div class="page-content">
+      <div class="wrapper">
+        
+    
+<div id="gh-comments">
+    <br/><br/>
+    <h6>COMMENTS</h6>
+    <div id="gh-comments-list"></div>
+</div>
+
+<script src="/js/github-comments.js"> </script>
+
+<script type="text/javascript"> 
+    DoGithubComments ( 
+        "homeservernotes/homeservernotes.info" , 
+        "8" 
+    ); 
+</script>
+
+<noscript>Please enable JavaScript to view comments.</noscript>
+
+
+
+      </div>
+    </div><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col">
+        <p class="feed-subscribe">
+          <a href="/feed.xml">
+            <svg class="svg-icon orange">
+              <path d="M12.8 16C12.8 8.978 7.022 3.2 0 3.2V0c8.777 0 16 7.223 16 16h-3.2zM2.194
+                11.61c1.21 0 2.195.985 2.195 2.196 0 1.21-.99 2.194-2.2 2.194C.98 16 0 15.017 0
+                13.806c0-1.21.983-2.195 2.194-2.195zM10.606
+                16h-3.11c0-4.113-3.383-7.497-7.496-7.497v-3.11c5.818 0 10.606 4.79 10.606 10.607z"
+              />
+            </svg><span>Subscribe</span>
+          </a>
+        </p>
+      </div>
+      <div class="footer-col">
+        <p></p>
+      </div>
+    </div>
+
+    <div class="social-links"><ul class="social-media-list"></ul>
+</div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>

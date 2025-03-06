@@ -1,0 +1,771 @@
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="/feed.xml" rel="self" type="application/atom+xml" /><link href="/" rel="alternate" type="text/html" /><updated>2025-03-06T13:15:59-08:00</updated><id>/feed.xml</id><title type="html">Home Server Group</title><entry><title type="html">walk-through: DNS server running in docker container</title><link href="/2025/03/06/walk-through-dns-server-running-in-docker-container.html" rel="alternate" type="text/html" title="walk-through: DNS server running in docker container" /><published>2025-03-06T12:58:27-08:00</published><updated>2025-03-06T12:58:27-08:00</updated><id>/2025/03/06/walk-through--dns-server-running-in-docker-container</id><content type="html" xml:base="/2025/03/06/walk-through-dns-server-running-in-docker-container.html"><![CDATA[<h2 id="overview">Overview</h2>
+
+<p>This post will demonstrate a simple but useful example of a container.</p>
+
+<h2 id="motivation">Motivation</h2>
+
+<p><a href="https://changelog.com/podcast/581">Episode 581 of the changelog podcast</a>, features an interview with <a href="https://en.wikipedia.org/wiki/Paul_Vixie">Paul Vixie</a>, a contributor to both <a href="https://www.internethalloffame.org/inductee/paul-vixie/">the design and implementation of several DNS protocol extensions</a>.  In this interview, Vixie advocates running and using a DNS server locally on your personal computer:</p>
+
+<p><img src="/assets/2025-03-06-walk-through--dns-server-running-in-docker-container/vixieQuote.jpg" alt="your-image-description" style="border: 2px solid grey;" /></p>
+
+<p>This post goes through the process of using <a href="https://docker.com">Docker</a> to build an image that contains the <a href="https://www.nlnetlabs.nl/projects/unbound/about/">unbound dns server</a> built from source and run that image as a background process on your local machine.</p>
+
+<h2 id="setting-up">Setting up</h2>
+
+<p>First, install <a href="https://docker.com">docker</a> and <a href="https://docs.docker.com/compose/">docker compose</a> on your computer.  This walk-through uses <a href="https://git-scm.com/">git</a> too so install that if necessary.   For example, on Ubuntu, use apt:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>hs@vbox:~$ sudo apt install docker.io docker-compose-v2 git -y
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+... lots of output removed ...
+hs@vbox:~$
+</code></pre></div></div>
+
+<h2 id="get-the-related-source-files-from-github">Get the related source files from github:</h2>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>hs@vbox:~$ git clone https://github.com/homeserversample/docker-unbound-source.git
+Cloning into 'docker-unbound-source'...
+remote: Enumerating objects: 44, done.
+remote: Counting objects: 100% (44/44), done.
+remote: Compressing objects: 100% (31/31), done.
+remote: Total 44 (delta 14), reused 39 (delta 9), pack-reused 0 (from 0)
+Receiving objects: 100% (44/44), 6.25 KiB | 2.08 MiB/s, done.
+Resolving deltas: 100% (14/14), done.
+hs@vbox:~$
+
+</code></pre></div></div>
+
+<p>This repository includes:</p>
+<ul>
+  <li>A Dockerfile file which specifies how to build the image from source.</li>
+  <li>A docker-compose.yaml file which specifies how to run the image.</li>
+  <li>A localhost.conf file that specifies the configuration for unbound.</li>
+  <li>An empty unbound.log file which unbound will write logging output to.</li>
+</ul>
+
+<p>Note that the docker compose file contains the following line:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    build: .
+</code></pre></div></div>
+
+<p>This line directs docker compose to build the image based on the Dockerfile in the current directory if the image does not already exist.</p>
+
+<h2 id="start-the-unbound-server">Start the unbound server.</h2>
+
+<p>In the “docker-unbound-source” repo, type <code class="language-plaintext highlighter-rouge">sudo docker compose up</code>.   This will run unbound inside a container per the specifications in docker-compose.yaml.   If needed (the first time only), docker will build the image per the specifications in Dockerfile.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>hs@vbox:~$ cd docker-unbound-source/
+hs@vbox:~/docker-unbound-source$ sudo docker compose up
+[+] Building 128.4s (16/19)                                                                                                                                          docker:default
+ =&gt; [unbound internal] load build definition from Dockerfile                                                                                                                   0.0s
+ =&gt; =&gt; transferring dockerfile: 664B                                                                                                                                           0.0s
+ =&gt; [unbound internal] load metadata for docker.io/library/ubuntu:latest                                                                                                       1.2s
+ =&gt; [unbound internal] load .dockerignore                                                                                                                                      0.0s
+ =&gt; =&gt; transferring context: 2B                                                                                                                                                0.0s
+ =&gt; [unbound  1/16] FROM docker.io/library/ubuntu:latest@sha256:72297848456d5d37d1262630108ab308d3e9ec7ed1c3286a32fe09856619a782                                               2.4s
+
+...deleted lengthy transcript...
+
+ =&gt; =&gt; writing image sha256:06bafa09419dc2324070786743d42435fe75c6eec9d82faf9bc6df9ddfbdb876                                                                                   0.0s
+ =&gt; =&gt; naming to docker.io/library/docker-unbound-source-unbound                                                                                                               0.0s
+[+] Running 1/1
+ ✔ Container docker-unbound-source-unbound-1  Created                                                                                                                          0.2s
+Attaching to unbound-1
+
+</code></pre></div></div>
+
+<h1 id="take-note-of-running-docker-container">Take note of running docker container.</h1>
+
+<p>At this point the unbound DNS server should be running in a docker container on your system.   In a new window, use <code class="language-plaintext highlighter-rouge">sudo docker ps</code> to list the running containers:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>hs@vbox:~$ sudo docker ps
+CONTAINER ID   IMAGE                           COMMAND                  CREATED         STATUS         PORTS     NAMES
+9dfb2d3cf895   docker-unbound-source-unbound   "unbound -d -c /conf…"   7 minutes ago   Up 7 minutes             docker-unbound-source-unbound-1
+hs@vbox:~$
+</code></pre></div></div>
+
+<h2 id="use-dig-to-test-the-dns-server">Use dig to test the DNS server</h2>
+
+<p>Unbound should be listening for DNS queries on the localhost network interface for the computer that it is running on.  Use dig (in a new terminal) to verify this:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>hs@vbox:~$
+hs@vbox:~$ dig @127.0.0.1 google.com
+
+; &lt;&lt;&gt;&gt; DiG 9.18.30-0ubuntu0.24.04.2-Ubuntu &lt;&lt;&gt;&gt; @127.0.0.1 google.com
+; (1 server found)
+;; global options: +cmd
+;; Got answer:
+;; -&gt;&gt;HEADER&lt;&lt;- opcode: QUERY, status: NOERROR, id: 43916
+;; flags: qr rd ra; QUERY: 1, ANSWER: 1, AUTHORITY: 0, ADDITIONAL: 1
+
+;; OPT PSEUDOSECTION:
+; EDNS: version: 0, flags:; udp: 1232
+;; QUESTION SECTION:
+;google.com.                    IN      A
+
+;; ANSWER SECTION:
+google.com.             267     IN      A       142.251.211.238
+
+;; Query time: 1 msec
+;; SERVER: 127.0.0.1#53(127.0.0.1) (UDP)
+;; WHEN: Fri Feb 28 15:37:37 PST 2025
+;; MSG SIZE  rcvd: 55
+
+hs@vbox:~$
+</code></pre></div></div>
+
+<p>Note that the SERVER is reported to be 127.0.0.1#53.   This is the address/port that the unbound server listens on.</p>
+
+<h2 id="make-localhost-the-default-dns-server">Make localhost the default DNS server</h2>
+
+<p>At this point, unbound is running and responding to local DNS queries but is not (yet) the default DNS service for this computer.  If you use dig <em>without</em> specifying a server to use you can see that the default server is not 127.0.0.1:53 .   In my case it is 127.0.0.53:53 :</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>hs@vbox:~$ dig google.com
+
+; &lt;&lt;&gt;&gt; DiG 9.18.30-0ubuntu0.24.04.2-Ubuntu &lt;&lt;&gt;&gt; google.com
+;; global options: +cmd
+;; Got answer:
+;; -&gt;&gt;HEADER&lt;&lt;- opcode: QUERY, status: NOERROR, id: 11243
+;; flags: qr rd ra; QUERY: 1, ANSWER: 1, AUTHORITY: 0, ADDITIONAL: 1
+
+;; OPT PSEUDOSECTION:
+; EDNS: version: 0, flags:; udp: 65494
+;; QUESTION SECTION:
+;google.com.                    IN      A
+
+;; ANSWER SECTION:
+google.com.             85      IN      A       142.251.211.238
+
+;; Query time: 8 msec
+;; SERVER: 127.0.0.53#53(127.0.0.53) (UDP)
+;; WHEN: Fri Feb 28 15:57:05 PST 2025
+;; MSG SIZE  rcvd: 55
+
+hs@vbox:~$
+
+</code></pre></div></div>
+
+<p>How to change the default DNS server will vary from one machine to another.   On a Ubuntu 24.04 computer I deleted the existing /etc/resolv.conf link and recreated /etc/resolve.conf as a file specifying 127.0.0.1 as my DNS server with 1.1.1.1 as an alternate server in case something goes wrong with the containerized unbound:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>hs@vbox:~$ cd /etc
+hs@vbox:/etc$ ls -la resolv.conf
+lrwxrwxrwx 1 root root 39 Apr 24  2024 resolv.conf -&gt; ../run/systemd/resolve/stub-resolv.conf
+hs@vbox:/etc$ sudo su
+root@vbox:/etc# cp resolv.conf  resolv.conf.sav
+root@vbox:/etc# rm resolv.conf
+root@vbox:/etc# cat &gt; resolv.conf &lt;&lt; DONE
+&gt; nameserver 127.0.0.1
+nameserer 1.1.1.1
+options edns0 trust-ad
+search lan
+DONE
+root@vbox:/etc#
+root@vbox:/etc#
+root@vbox:/etc# exit
+exit
+hs@vbox:/etc$
+hs@vbox:/etc$ cat resolv.conf
+nameserver 127.0.0.1
+nameserer 1.1.1.1
+options edns0 trust-ad
+search lan
+hs@vbox:/etc$
+</code></pre></div></div>
+
+<h2 id="use-dig-again-to-verify-that-the-default-server-is-now-localhost">Use dig again to verify that the default server is now localhost:</h2>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>hs@vbox:/etc$ dig google.com
+
+; &lt;&lt;&gt;&gt; DiG 9.18.30-0ubuntu0.24.04.2-Ubuntu &lt;&lt;&gt;&gt; google.com
+;; global options: +cmd
+;; Got answer:
+;; -&gt;&gt;HEADER&lt;&lt;- opcode: QUERY, status: NOERROR, id: 16543
+;; flags: qr rd ra; QUERY: 1, ANSWER: 1, AUTHORITY: 0, ADDITIONAL: 1
+
+;; OPT PSEUDOSECTION:
+; EDNS: version: 0, flags:; udp: 1232
+;; QUESTION SECTION:
+;google.com.                    IN      A
+
+;; ANSWER SECTION:
+google.com.             300     IN      A       142.251.211.238
+
+;; Query time: 14 msec
+;; SERVER: 127.0.0.1#53(127.0.0.1) (UDP)
+;; WHEN: Fri Feb 28 16:09:35 PST 2025
+;; MSG SIZE  rcvd: 55
+
+</code></pre></div></div>
+
+<h2 id="running-the-containerized-unbound-as-a-background-service">Running the containerized unbound as a background service</h2>
+
+<p>If the unbound server is still running, you can close it gracefully with a ctrl-c in the terminal that it is running in:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[+] Running 1/1
+ ✔ Container docker-unbound-source-unbound-1  Created                                                                                                   0.1s
+Attaching to unbound-1
+^CGracefully stopping... (press Ctrl+C again to force)
+[+] Stopping 1/0
+ ✔ Container docker-unbound-source-unbound-1  Stopped                                                                                                                          0.1s
+canceled
+hs@vbox:~/docker-unbound-source$
+
+</code></pre></div></div>
+
+<p>If you like, you can use dig again to verify that the server is no longer functioning:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>hs@vbox:/etc$ dig google.com
+;; communications error to 127.0.0.1#53: connection refused
+;; communications error to 127.0.0.1#53: connection refused
+;; communications error to 127.0.0.1#53: connection refused
+
+; &lt;&lt;&gt;&gt; DiG 9.18.30-0ubuntu0.24.04.2-Ubuntu &lt;&lt;&gt;&gt; google.com
+;; global options: +cmd
+;; no servers could be reached
+hs@vbox:/etc$ cat resolv.conf
+nameserver 127.0.0.1
+nameserer 1.1.1.1
+options edns0 trust-ad
+search lan
+hs@vbox:/etc$
+</code></pre></div></div>
+
+<p>Note that my backup server didn’t run either due to a typo in <code class="language-plaintext highlighter-rouge">/etc/resolv.conf</code> ( “nameserver” spelled wrong on second line ).</p>
+
+<p>After fixing the typo <code class="language-plaintext highlighter-rouge">dig google.com</code> uses the 1.1.1.1 DNS server and gives the expected result:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>hs@vbox:/etc$ dig google.com
+;; communications error to 127.0.0.1#53: connection refused
+;; communications error to 127.0.0.1#53: connection refused
+;; communications error to 127.0.0.1#53: connection refused
+
+; &lt;&lt;&gt;&gt; DiG 9.18.30-0ubuntu0.24.04.2-Ubuntu &lt;&lt;&gt;&gt; google.com
+;; global options: +cmd
+;; Got answer:
+;; -&gt;&gt;HEADER&lt;&lt;- opcode: QUERY, status: NOERROR, id: 63053
+;; flags: qr rd ra; QUERY: 1, ANSWER: 1, AUTHORITY: 0, ADDITIONAL: 1
+
+;; OPT PSEUDOSECTION:
+; EDNS: version: 0, flags:; udp: 1232
+;; QUESTION SECTION:
+;google.com.                    IN      A
+
+;; ANSWER SECTION:
+google.com.             107     IN      A       142.251.33.78
+
+;; Query time: 27 msec
+;; SERVER: 1.1.1.1#53(1.1.1.1) (UDP)
+;; WHEN: Fri Feb 28 16:22:14 PST 2025
+;; MSG SIZE  rcvd: 55
+
+hs@vbox:/etc$
+</code></pre></div></div>
+<p>To run the containerized unbound DNS server as a background sevice, add a <code class="language-plaintext highlighter-rouge">-d</code> argument to the <code class="language-plaintext highlighter-rouge">docker compose up</code> command used earlier:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>hs@vbox:~/docker-unbound-source$ sudo docker compose up -d
+[+] Running 1/1
+ ✔ Container docker-unbound-source-unbound-1  Started                                                                                                                          0.2s
+hs@vbox:~/docker-unbound-source$
+hs@vbox:~/docker-unbound-source$ sudo docker ps
+CONTAINER ID   IMAGE                           COMMAND                  CREATED          STATUS          PORTS     NAMES
+bce4cc48eb8a   docker-unbound-source-unbound   "unbound -d -c /conf…"   50 minutes ago   Up 23 seconds             docker-unbound-source-unbound-1
+hs@vbox:~/docker-unbound-source$
+</code></pre></div></div>
+
+<p>Note the use of <code class="language-plaintext highlighter-rouge">docker ps</code> to verify that the container is running.</p>
+
+<p>You can use dig again (not shown here) to verify that unbound is functioning.</p>
+
+<p>At this point, the docker system should restart the containerized unbound automatically after a reboot.</p>
+
+<p>To shutdown the container, use <code class="language-plaintext highlighter-rouge">docker compose down</code> in the same directory as the docker-compose.yaml file:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>hs@vbox:~$ pwd
+/home/hs
+hs@vbox:~$ cd docker-unbound-source/
+hs@vbox:~/docker-unbound-source$ ls
+conf  docker-compose.yaml  Dockerfile  log
+hs@vbox:~/docker-unbound-source$ sudo docker compose down
+[+] Running 1/1
+ ✔ Container docker-unbound-source-unbound-1  Removed                                                                                                                          0.1s
+hs@vbox:~/docker-unbound-source$
+hs@vbox:~/docker-unbound-source$
+hs@vbox:~/docker-unbound-source$ sudo docker ps
+CONTAINER ID   IMAGE     COMMAND   CREATED   STATUS    PORTS     NAMES
+hs@vbox:~/docker-unbound-source$
+hs@vbox:~/docker-unbound-source$
+</code></pre></div></div>
+
+<p>Note the use of <code class="language-plaintext highlighter-rouge">docker ps</code> to verify that the container is no longer running.</p>
+
+<p>Use <code class="language-plaintext highlighter-rouge">docker compose up -d</code> to start the containerized unbound server back up.</p>
+
+<p>At this point you can leave the unbound server running to “listen on the loopback address” for DNS queries (as Paul Vixie suggested) or restore the computer to the original settings:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>hs@vbox:~$ cd /etc
+hs@vbox:/etc$ sudo su
+root@vbox:/etc# cp resolv.conf resolv.conf.save2
+root@vbox:/etc# ln -s ../run/systemd/resolve/stub-resolv.conf resolv.conf
+ln: failed to create symbolic link 'resolv.conf': File exists
+root@vbox:/etc# rm resolv.conf
+root@vbox:/etc# ln -s ../run/systemd/resolve/stub-resolv.conf resolv.conf
+root@vbox:/etc# diff resolv.conf resolv.conf.save
+root@vbox:/etc#
+exit
+hs@vbox:/etc$ dig google.com
+
+; &lt;&lt;&gt;&gt; DiG 9.18.30-0ubuntu0.24.04.2-Ubuntu &lt;&lt;&gt;&gt; google.com
+;; global options: +cmd
+;; Got answer:
+;; -&gt;&gt;HEADER&lt;&lt;- opcode: QUERY, status: NOERROR, id: 47738
+;; flags: qr rd ra; QUERY: 1, ANSWER: 1, AUTHORITY: 0, ADDITIONAL: 1
+
+;; OPT PSEUDOSECTION:
+; EDNS: version: 0, flags:; udp: 65494
+;; QUESTION SECTION:
+;google.com.                    IN      A
+
+;; ANSWER SECTION:
+google.com.             63      IN      A       142.250.217.78
+
+;; Query time: 8 msec
+;; SERVER: 127.0.0.53#53(127.0.0.53) (UDP)
+;; WHEN: Fri Feb 28 16:44:46 PST 2025
+;; MSG SIZE  rcvd: 55
+
+hs@vbox:/etc$
+
+</code></pre></div></div>
+
+<p>Note the use of dig again to confirm that the original settings have been successfully restored.</p>]]></content><author><name></name></author><summary type="html"><![CDATA[Overview]]></summary></entry><entry><title type="html">A (very brief) intro to containers</title><link href="/2025/02/24/a-very-brief-intro-to-containers.html" rel="alternate" type="text/html" title="A (very brief) intro to containers" /><published>2025-02-24T18:19:01-08:00</published><updated>2025-02-24T18:19:01-08:00</updated><id>/2025/02/24/a--very-brief--intro-to-containers</id><content type="html" xml:base="/2025/02/24/a-very-brief-intro-to-containers.html"><![CDATA[<h2 id="overview">Overview</h2>
+<p>A container is an isolated runtime environment with limited access to the host machine.  Typically you use this container to run a specific command.   For example, I use a docker container to run plex.    Along with the plex command, the container “contains” all the libraries and system config files (and probably some other stuff too) that Plex needs to run..   This guarantees that Plex will run without any dependency problems and without installing libraries that conflict with <em>other</em> things already installed on my computer.   It also makes Plex easy to uninstall: just delete the container.</p>
+
+<p>There are several different container management tools (docker, podman, lxc, … ) but I’m going to use docker in this email as a generic example of a container manager.</p>
+
+<h2 id="getting-started">Getting Started</h2>
+<p>If you want to try out containers you can install docker on your linux box.  In ubuntu or other debian based systems you can use apt : “sudo apt install docker.io”.   Docker (the organization) provides a nice “hello-world” test which you can run on the command line: “sudo docker run hello-world”.   This should result in a multiline hello message in the terminal.   The sudo is required because docker needs to run as root.</p>
+
+<p>The first time you run the hello-world test it will download an “image” which is a starting point for that container.  This will take a few seconds but if you run the test again the image is cached and you should see the response without delay.</p>
+
+<p>To see a list of all the cached images, run “sudo docker images” on the command line.   To see a list of all running containers, run “sudo docker ps”.   If you do that after running the hello-world test you should see one cached image and no running containers (because the test is no longer running).</p>
+
+<p>An optional argument to “sudo docker run” is the executable to be run inside the container.  So, for example, to run a shell in a container you could type “docker run -i -t &lt;image-name&gt; bash” assuming the named image includes (“contains”) bash.  The “-i -t” arguments tell docker that the container needs to be interactive ( -i ) and supply a terminal ( -t ).</p>
+
+<p>If you run “sudo docker run -i -t ubuntu bash” you will get a shell prompt that gives you a way to see what is inside the “ubuntu” container.   If you leave the new shell running and (in a different terminal) run “sudo docker ps” you will see the running container.   Once you exit the shell running in the container, “sudo docker ps” will no longer show that container because it is no longer running.</p>
+
+<p>If you run “sudo docker run -i -t ubuntu bash” again you can make whatever changes you like in the container (apt updates, delete files, create new users, whatever).   If you exit the container (ctrl-d in the shell) and start it again, these changes will not be seen because each time, the container starts fresh from the image (ubuntu in this case).   Of course there are ways around this but I’m just focusing on the basics here.</p>
+
+<p>In general, access to the host machine (networking, filesystem, gpu, etc) is granted at run time to the container on an as needed basis.</p>]]></content><author><name></name></author><summary type="html"><![CDATA[Overview A container is an isolated runtime environment with limited access to the host machine. Typically you use this container to run a specific command. For example, I use a docker container to run plex. Along with the plex command, the container “contains” all the libraries and system config files (and probably some other stuff too) that Plex needs to run.. This guarantees that Plex will run without any dependency problems and without installing libraries that conflict with other things already installed on my computer. It also makes Plex easy to uninstall: just delete the container.]]></summary></entry><entry><title type="html">Meeting on February 20</title><link href="/2025/02/20/meeting-on-february-20.html" rel="alternate" type="text/html" title="Meeting on February 20" /><published>2025-02-20T19:27:19-08:00</published><updated>2025-02-20T19:27:19-08:00</updated><id>/2025/02/20/meeting-on-february-20</id><content type="html" xml:base="/2025/02/20/meeting-on-february-20.html"><![CDATA[<h2 id="overview">Overview</h2>
+<ul>
+  <li>4 people attended.</li>
+</ul>
+
+<h2 id="some-topics-discussed">Some topics discussed</h2>
+
+<ul>
+  <li><a href="https://firefly-iii.org/">firefly III: A free and open source personal finance manager</a></li>
+  <li><a href="https://www.portainer.io/">portainer</a></li>
+  <li>reverse proxies : <a href="https://traefik.io/traefik/">traefik</a>, <a href="https://caddyserver.com/docs/quick-starts/reverse-proxy">caddy</a></li>
+  <li>traefik/kubernettes</li>
+  <li>traefik/portainer</li>
+  <li><a href="https://pve.proxmox.com/wiki/Unprivileged_LXC_containers">proxmox access to files on host</a></li>
+</ul>]]></content><author><name></name></author><summary type="html"><![CDATA[Overview 4 people attended.]]></summary></entry><entry><title type="html">Running a private docker repository with access through tailscale</title><link href="/2025/02/14/running-a-private-docker-repository-with-access-through-tailscale.html" rel="alternate" type="text/html" title="Running a private docker repository with access through tailscale" /><published>2025-02-14T17:02:36-08:00</published><updated>2025-02-14T17:02:36-08:00</updated><id>/2025/02/14/running-a-private-docker-repository-with-access-through-tailscale</id><content type="html" xml:base="/2025/02/14/running-a-private-docker-repository-with-access-through-tailscale.html"><![CDATA[<p>This a summary of the steps I went through to get a private container (docker/podman) repository running on a home server with access through URL’s provided by tailscale.   There’s nothing original written here but it took me a while to figure it out and I wanted to collect it in one place.</p>
+
+<p>I’ve been using docker compose to manage my server so I looked online for a suitable docker-compose.yaml file.   I found one in <a href="https://github.com/wshihadeh/docker-registry">this github repository</a> which I cloned to my local machine.   I changed the volumes for data and certs to map to directories on the host and changed the tls certificate files to files created by me.</p>
+
+<p>The end result looked like this:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>networks:
+  registry:
+    external: false
+
+services:
+
+  registry:
+    container_name: "registry_web"
+    image: registry:2.6
+    ports:
+      - 5000:5000
+    environment:
+      REGISTRY_HTTP_ADDR: :5000
+      REGISTRY_HTTP_TLS_CERTIFICATE: /certs/cert.crt
+      REGISTRY_HTTP_TLS_KEY: /certs/cert.key
+      REGISTRY_STORAGE: filesystem
+      REGISTRY_STORAGE_DELETE_ENABLED: 'true'
+      REGISTRY_STORAGE_FILESYSTEM_ROOTDIRECTORY: /var/lib/registry
+    volumes:
+      - ./data:/var/lib/registry
+      - ./certs:/certs
+      - ./config/config.yml:/etc/docker/registry/config.yml
+    restart: always
+    logging:
+      driver: "json-file"
+      options:
+        "max-size": "10m"
+        "max-file": "5"
+    networks:
+      - registry
+</code></pre></div></div>
+<p>To create the ssl certificate, I used <code class="language-plaintext highlighter-rouge">tailscale cert</code> per <a href="https://tailscale.com/kb/1153/enabling-https">these instructions</a> to create <code class="language-plaintext highlighter-rouge">cert.crt</code> and <code class="language-plaintext highlighter-rouge">cert.key</code></p>
+
+<p>I had to specify <code class="language-plaintext highlighter-rouge">cert.crt</code> and <code class="language-plaintext highlighter-rouge">cert.key</code> in the docker-compose file (see above).</p>
+
+<p>Now, after running <code class="language-plaintext highlighter-rouge">docker compose up</code> in the directory containing the compose file, I can tag local images with the tailscale url for the server and then push them to the server.   An image that resides on the server can be run with either podman or docker.</p>
+
+<p>To run tailscale on the server I use <code class="language-plaintext highlighter-rouge">sudo tailscale up --accept-dns=false</code> to avoid the clever tailscale DNS tricks.   They <em>are</em> clever and useful but I found them to cause problems when running a docker container on the server that needs to access the internet.   This may or may not affect this particular project but I think it’s a good practice generally.   This is only for the server - clients do need the DNS cleverness.</p>]]></content><author><name></name></author><summary type="html"><![CDATA[This a summary of the steps I went through to get a private container (docker/podman) repository running on a home server with access through URL’s provided by tailscale. There’s nothing original written here but it took me a while to figure it out and I wanted to collect it in one place.]]></summary></entry><entry><title type="html">Today I Learned: tailscale keys expire after 180 days</title><link href="/2024/11/17/today-i-learned-tailscale-keys-expire-after-180-days.html" rel="alternate" type="text/html" title="Today I Learned: tailscale keys expire after 180 days" /><published>2024-11-17T16:02:30-08:00</published><updated>2024-11-17T16:02:30-08:00</updated><id>/2024/11/17/today-i-learned---tailscale-keys-expire-after-180-days</id><content type="html" xml:base="/2024/11/17/today-i-learned-tailscale-keys-expire-after-180-days.html"><![CDATA[<p>After using tailscale for (I assume) 180 days, one of my nodes stopped responding through the tailscale domain name.   I logged in to the tailscale dashboard and saw that the key for that node had expired and needed to be refreshed.  Tailscale documentation says that this happens after 180 days.   Here’s the <a href="https://tailscale.com/kb/1028/key-expiry">relevant documentation</a>.</p>]]></content><author><name></name></author><summary type="html"><![CDATA[After using tailscale for (I assume) 180 days, one of my nodes stopped responding through the tailscale domain name. I logged in to the tailscale dashboard and saw that the key for that node had expired and needed to be refreshed. Tailscale documentation says that this happens after 180 days. Here’s the relevant documentation.]]></summary></entry><entry><title type="html">Getting up to speed with pi-hole</title><link href="/2024/10/19/getting-up-to-speed-with-pi-hole.html" rel="alternate" type="text/html" title="Getting up to speed with pi-hole" /><published>2024-10-19T18:56:34-07:00</published><updated>2024-10-19T18:56:34-07:00</updated><id>/2024/10/19/getting-up-to-speed-with-pi-hole</id><content type="html" xml:base="/2024/10/19/getting-up-to-speed-with-pi-hole.html"><![CDATA[<p>This is a step by step summary of what it was like to install and use pi-hole on a proxmox server serving a small home network.</p>
+
+<h2 id="install-in-proxmox-container">Install in proxmox container</h2>
+
+<ul>
+  <li>Created a new container
+    <ul>
+      <li>Static IP ( 192.168.8.141 )</li>
+      <li>2 cpus (may not have been necessary)</li>
+      <li>default settings otherwise</li>
+    </ul>
+  </li>
+  <li>Started new container</li>
+  <li>Used apt update &amp; apt upgrade to bring up to date</li>
+  <li>Used apt to install curl</li>
+  <li>Used curl to install pi-hole per <a href="https://github.com/pi-hole/pi-hole/#one-step-automated-install">instructions on site</a></li>
+  <li>Take note of pi-hole password.</li>
+  <li>Used ps to verify that pi-hole is running:</li>
+</ul>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>root@pihole2:~# ps -ef | grep pi
+message+     102       1  0 01:45 ?        00:00:00 @dbus-daemon --system --address=systemd: --nofork --nopidfile --systemd-activation --syslog-only
+pihole       158       1  0 01:45 ?        00:00:01 /usr/bin/pihole-FTL -f
+postfix      331     326  0 01:45 ?        00:00:00 pickup -l -t unix -u -c
+root         547     537  0 02:05 pts/1    00:00:00 grep --color=auto pi
+root@pihole2:~# 
+</code></pre></div></div>
+<ul>
+  <li>Reboot container and use ps again to verify automatic starting.</li>
+</ul>
+
+<h2 id="try-it-out-from-a-client-computer">Try it out from a client computer.</h2>
+
+<ul>
+  <li>
+    <p>Specify the pi-hole as DNS server by IP address.  Windows example shown below.
+<img src="/assets/2024-10-20__getting-up-to-speed-with-pi-hole/wireless_ip_settings_for_pihole.jpg" alt="your-image-description" style="border: 2px solid grey;" /></p>
+  </li>
+  <li>Make sure web browsing still works.</li>
+  <li>Access pi-hole control through browser : <code class="language-plaintext highlighter-rouge">https://192.168.8.141/admin</code></li>
+  <li>Use browser interface to disable/enable blocking.   Try browsing both ways.</li>
+</ul>
+
+<h2 id="eliminate-the-middleman-try-pi-hole-with-a-recursive-dns-server">Eliminate the middleman! Try pi-hole with a recursive DNS server.</h2>
+
+<ul>
+  <li>Per <a href="https://docs.pi-hole.net/guides/dns/unbound/">these instructions</a>, install and configure unbound.</li>
+</ul>
+
+<p>(install)</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>root@pihole2:~# apt install unbound
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+The following NEW packages will be installed:
+  unbound
+0 upgraded, 1 newly installed, 0 to remove and 0 not upgraded.
+</code></pre></div></div>
+<p>(and configure)</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>root@pihole2:~# cd /etc/unbound/unbound.conf.d/
+root@pihole2:/etc/unbound/unbound.conf.d# ls
+root-auto-trust-anchor-file.conf
+root@pihole2:/etc/unbound/unbound.conf.d# cat &gt; pi-hole.conf
+server:
+    # If no logfile is specified, syslog is used
+    # logfile: "/var/log/unbound/unbound.log"
+    verbosity: 0
+
+    interface: 127.0.0.1
+    port: 5335
+    do-ip4: yes
+    do-udp: yes
+    do-tcp: yes
+
+    # May be set to yes if you have IPv6 connectivity
+    do-ip6: no
+
+    # You want to leave this to no unless you have *native* IPv6. With 6to4 and
+    # Terredo tunnels your web browser should favor IPv4 for the same reasons
+    prefer-ip6: no
+
+    # Use this only when you downloaded the list of primary root servers!
+    # If you use the default dns-root-data package, unbound will find it automatically
+    #root-hints: "/var/lib/unbound/root.hints"
+
+    # Trust glue only if it is within the server's authority
+    harden-glue: yes
+
+    # Require DNSSEC data for trust-anchored zones, if such data is absent, the zone becomes BOGUS
+    harden-dnssec-stripped: yes
+
+    # Don't use Capitalization randomization as it known to cause DNSSEC issues sometimes
+    # see https://discourse.pi-hole.net/t/unbound-stubby-or-dnscrypt-proxy/9378 for further details
+    use-caps-for-id: no
+
+    # Reduce EDNS reassembly buffer size.
+    # IP fragmentation is unreliable on the Internet today, and can cause
+    # transmission failures when large DNS messages are sent via UDP. Even
+    # when fragmentation does work, it may not be secure; it is theoretically
+    # possible to spoof parts of a fragmented DNS message, without easy
+    # detection at the receiving end. Recently, there was an excellent study
+    # &gt;&gt;&gt; Defragmenting DNS - Determining the optimal maximum UDP response size for DNS &lt;&lt;&lt;
+    # by Axel Koolhaas, and Tjeerd Slokker (https://indico.dns-oarc.net/event/36/contributions/776/)
+    # in collaboration with NLnet Labs explored DNS using real world data from the
+    # the RIPE Atlas probes and the researchers suggested different values for
+    # IPv4 and IPv6 and in different scenarios. They advise that servers should
+    # be configured to limit DNS messages sent over UDP to a size that will not
+    # trigger fragmentation on typical network links. DNS servers can switch
+    # from UDP to TCP when a DNS response is too big to fit in this limited
+    # buffer size. This value has also been suggested in DNS Flag Day 2020.
+    edns-buffer-size: 1232
+
+    # Perform prefetching of close to expired message cache entries
+    # This only applies to domains that have been frequently queried
+    prefetch: yes
+
+    # One thread should be sufficient, can be increased on beefy machines. In reality for most users running on small networks or on a single machine, it should be unnecessary to seek performance enhancement by increasing num-threads above 1.
+    num-threads: 1
+
+    # Ensure kernel buffer is large enough to not lose messages in traffic spikes
+    so-rcvbuf: 1m
+
+    # Ensure privacy of local IP ranges
+    private-address: 192.168.0.0/16
+    private-address: 169.254.0.0/16
+    private-address: 172.16.0.0/12
+    private-address: 10.0.0.0/8
+    private-address: fd00::/8
+    private-address: fe80::/10
+root@pihole2:/etc/unbound/unbound.conf.d# ls
+pi-hole.conf  root-auto-trust-anchor-file.conf
+root@pihole2:/etc/unbound/unbound.conf.d# 
+</code></pre></div></div>
+
+<ul>
+  <li>Start and test the recursive server (“unbound”).</li>
+</ul>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>root@pihole2:/etc/unbound/unbound.conf.d# ps -ef  | grep unb
+root        8070     537  0 20:54 pts/1    00:00:00 grep --color=auto unb
+root@pihole2:/etc/unbound/unbound.conf.d# service unbound restart
+root@pihole2:/etc/unbound/unbound.conf.d# ps -ef  | grep unb
+unbound     8091       1  0 20:56 ?        00:00:00 /usr/sbin/unbound -d -p
+root        8093     537  0 20:56 pts/1    00:00:00 grep --color=auto unb
+root@pihole2:/etc/unbound/unbound.conf.d# dig pi-hole.net @127.0.0.1 -p 5335
+
+; &lt;&lt;&gt;&gt; DiG 9.18.28-0ubuntu0.22.04.1-Ubuntu &lt;&lt;&gt;&gt; pi-hole.net @127.0.0.1 -p 5335
+;; global options: +cmd
+;; Got answer:
+;; -&gt;&gt;HEADER&lt;&lt;- opcode: QUERY, status: NOERROR, id: 55935
+;; flags: qr rd ra; QUERY: 1, ANSWER: 1, AUTHORITY: 0, ADDITIONAL: 1
+
+;; OPT PSEUDOSECTION:
+; EDNS: version: 0, flags:; udp: 1232
+;; QUESTION SECTION:
+;pi-hole.net.                   IN      A
+
+;; ANSWER SECTION:
+pi-hole.net.            300     IN      A       3.18.136.52
+
+;; Query time: 146 msec
+;; SERVER: 127.0.0.1#5335(127.0.0.1) (UDP)
+;; WHEN: Sun Oct 20 20:56:32 UTC 2024
+;; MSG SIZE  rcvd: 56
+
+root@pihole2:/etc/unbound/unbound.conf.d# 
+</code></pre></div></div>
+
+<ul>
+  <li>Per <a href="https://docs.pi-hole.net/guides/dns/unbound/">same instructions</a>, set edns-packet-max .  It’s not clear (to me at least) why.
+    <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>root@pihole2:/etc/unbound/unbound.conf.d# ls /etc/dnsmasq.d              
+01-pihole.conf  06-rfc6761.conf
+root@pihole2:/etc/unbound/unbound.conf.d# cat &gt; /etc/dnsmasq.d/99-edns.conf
+edns-packet-max=1232
+root@pihole2:/etc/unbound/unbound.conf.d#    
+</code></pre></div>    </div>
+  </li>
+  <li>
+    <p>Per <a href="https://docs.pi-hole.net/guides/dns/unbound/">same instructions</a>, use browser interface to configure pi-hole to use “unbound” as recursive dns server.</p>
+  </li>
+  <li>
+    <p>Browse web from client to test.</p>
+  </li>
+  <li>Reboot proxmox container to make sure that pi-hole and unbound both start up automatically.</li>
+</ul>
+
+<h2 id="try-pi-hole-for-the-rest-of-the-network">Try pi-hole for the rest of the network.</h2>
+
+<ul>
+  <li>Log in to your router and configure DNS for the LAN to use the pi-hole.</li>
+  <li>
+    <p>NOTE: With this change in place, DNS queries still go the the router by default but then get forwarded to the pi-hole DNS server.
+<img src="/assets/2024-10-20__getting-up-to-speed-with-pi-hole//router_settings_for_pihole.jpg" alt="your-image-description" style="border: 2px solid grey;" /></p>
+  </li>
+  <li>Test multiple clients, with and without ad blocking, to make sure the internet is still accessible.</li>
+</ul>
+
+<h2 id="how-well-does-it-work">How well does it work?</h2>
+
+<ul>
+  <li>The Good
+    <ul>
+      <li>Chrome &amp; firefox browsers on computer, phone, tablet:  ads blocked.</li>
+      <li>Pinterest app on android tablet: ads blocked.</li>
+      <li>Youtube app on android tablet: ads blocked.</li>
+      <li>Youtube (streaming video with ads) on roku:   many but not all ads blocked.</li>
+    </ul>
+  </li>
+  <li>The Bad
+    <ul>
+      <li>Some videos on cnn.com no longer play with ad blocking enabled.</li>
+    </ul>
+  </li>
+  <li>The Disappointing
+    <ul>
+      <li>Prime video (streaming video with ads) on roku:   ads appear as before.</li>
+      <li>Tubi (streaming video with ads) on roku:   ads appear as before.</li>
+    </ul>
+  </li>
+</ul>]]></content><author><name></name></author><summary type="html"><![CDATA[This is a step by step summary of what it was like to install and use pi-hole on a proxmox server serving a small home network.]]></summary></entry><entry><title type="html">Meeting on October 17</title><link href="/2024/10/18/meeting-on-october-17.html" rel="alternate" type="text/html" title="Meeting on October 17" /><published>2024-10-18T05:22:48-07:00</published><updated>2024-10-18T05:22:48-07:00</updated><id>/2024/10/18/meeting-on-october-17</id><content type="html" xml:base="/2024/10/18/meeting-on-october-17.html"><![CDATA[<h1 id="overview">Overview</h1>
+
+<p>The group met on zoom.  Six people attended.</p>
+
+<h1 id="topics-of-discussion">Topics of Discussion</h1>
+
+<ul>
+  <li>identity management systems: <a href="https://ldap.com/">LDAP</a>/<a href="https://github.com/lldap/lldap">LLDAP</a>/<a href="https://www.freeipa.org/">freeipa</a>/<a href="https://www.keycloak.org/">keycloak</a></li>
+  <li>Linux permissions: user/group/other , umask</li>
+  <li>project reqruiements : fileserver? wireguard?</li>
+  <li><a href="https://cert-manager.io/">certmanager</a></li>
+  <li><a href="https://en.wikipedia.org/wiki/Common_Address_Redundancy_Protocol">carp (common access redundancy protocol )</a></li>
+  <li><a href="https://www.haproxy.org/">haproxy</a></li>
+  <li><a href="https://ceph.com/en/">ceph</a>/<a href="https://docs.docker.com/engine/swarm/">dockerSwarm</a> as easier alternative to kubernetes</li>
+  <li><a href="https://rook.io/">rook</a></li>
+  <li>email: <a href="https://en.wikipedia.org/wiki/Local_Mail_Transfer_Protocol">lmtp</a>, <a href="https://www.dovecot.org/">dovecot</a>, <a href="https://www.postfix.org/">postfix</a></li>
+  <li><a href="https://pi-hole.net/">pi-hole</a></li>
+</ul>]]></content><author><name></name></author><summary type="html"><![CDATA[Overview]]></summary></entry><entry><title type="html">Meeting on October 3</title><link href="/2024/10/04/meeting-on-october-3.html" rel="alternate" type="text/html" title="Meeting on October 3" /><published>2024-10-04T08:08:04-07:00</published><updated>2024-10-04T08:08:04-07:00</updated><id>/2024/10/04/meeting-on-october-3</id><content type="html" xml:base="/2024/10/04/meeting-on-october-3.html"><![CDATA[<h1 id="overview">Overview</h1>
+<p>The group met on zoom. Seven people attended.</p>
+
+<h1 id="some-topics-discussed">Some Topics Discussed</h1>
+<ul>
+  <li>ansible</li>
+  <li>github collaboration (forks &amp; pull requests)</li>
+  <li>dhcp</li>
+  <li>dhcp lease duration</li>
+  <li>ipv6</li>
+  <li>ipsec</li>
+</ul>]]></content><author><name></name></author><summary type="html"><![CDATA[Overview The group met on zoom. Seven people attended.]]></summary></entry><entry><title type="html">Jekyll quickstart</title><link href="/2024/09/06/jekyll-quickstart.html" rel="alternate" type="text/html" title="Jekyll quickstart" /><published>2024-09-06T15:44:26-07:00</published><updated>2024-09-06T15:44:26-07:00</updated><id>/2024/09/06/jekyll-quickstart</id><content type="html" xml:base="/2024/09/06/jekyll-quickstart.html"><![CDATA[<p>In the Septemeber 5 meeting we did a walkthrough of how to build a simple website with jekyll.  This post goes through that process.   As a rough overview, the steps are:</p>
+<ul>
+  <li>Update your computer with the necessary utilities (npm, node, some other npm related utilities).</li>
+  <li>Clone the jekyll/minima repository.</li>
+  <li>Prepare the minima repository with the necessary dependencies.</li>
+  <li>Run jekyll to either serve or build the site.</li>
+</ul>
+
+<p>In more detail:</p>
+
+<h1 id="update-your-computer-as-needed">Update your computer as needed.</h1>
+
+<p>First bring the OS up to date.   I’m using Ubuntu in this example so the package manager is apt.</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>dev@xela:~/workdir$ sudo apt update -y                                                      
+dev@xela:~/workdir$ sudo apt upgrade -y
+</code></pre></div></div>
+
+<p>Install the utilities needed to support jekyll:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>dev@xela:~/workdir$ sudo apt install -y npm ruby-dev ruby-bundler zlib1g-dev
+Reading package lists... Done
+</code></pre></div></div>
+
+<p>Bring npm and node up to the latest versions:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>dev@xela:~/workdir$ sudo npm install -g n
+added 1 package in 279ms
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>dev@xela:~/workdir$ sudo n latest
+  installing : node-v22.8.0
+       mkdir : /usr/local/n/versions/node/22.8.0
+       fetch : https://nodejs.org/dist/v22.8.0/node-v22.8.0-linux-x64.tar.xz
+     copying : node/22.8.0
+   installed : v22.8.0 (with npm 10.8.2)
+
+dev@xela:~/workdir$ hash -r
+dev@xela:~/workdir$ node --version
+v22.8.0
+dev@xela:~/workdir$ npm --version
+10.8.2
+</code></pre></div></div>
+
+<h1 id="clone-the-jekyllminima-repository">Clone the jekyll/minima repository.</h1>
+
+<p>This walkthrough uses jekyll/minima which specifies a basic website but the steps should work with any jekyll site, including the <a href="https://github.com/dc25/belug.us">belug.us lookalike</a> and <a href="https://github.com/homeservernotes/homeservernotes.info">this site itself</a>.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>dev@xela:~/workdir$ git clone git@github.com:jekyll/minima.git
+Cloning into 'minima'...
+</code></pre></div></div>
+
+<h1 id="prepare-the-minima-repository-with-the-necessary-dependencies">Prepare the minima repository with the necessary dependencies:</h1>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>dev@xela:~/workdir/minima$ bundle config path 'vendor/bundle' --local
+dev@xela:~/workdir/minima$ bundle install
+Resolving dependencies...
+Fetching gem metadata from https://rubygems.org/............
+</code></pre></div></div>
+<h1 id="use-jekyll-to-build-and-serve-the-site">Use jekyll to build and serve the site:</h1>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>dev@xela:~/workdir/minima$ bundle exec jekyll serve -H 0.0.0.0
+Configuration file: /home/dev/workdir/minima/_config.yml
+ Theme Config file: /home/dev/workdir/minima/_config.yml
+            Source: /home/dev/workdir/minima
+       Destination: /home/dev/workdir/minima/_site
+ Incremental build: disabled. Enable with --incremental
+      Generating...
+       Jekyll Feed: Generating feed for posts
+                    done in 0.351 seconds.
+ Auto-regeneration: enabled for '/home/dev/workdir/minima'
+    Server address: http://0.0.0.0:4000
+  Server running... press ctrl-c to stop.
+[2024-09-06 22:20:52] ERROR `/favicon.ico' not found.
+^C^C
+</code></pre></div></div>
+
+<h1 id="or-use-jekyll-to-just-build-the-site">Or use jekyll to just build the site:</h1>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>dev@xela:~/workdir/minima$ rm -rf _site/
+dev@xela:~/workdir/minima$ bundle exec jekyll build
+Configuration file: /home/dev/workdir/minima/_config.yml
+ Theme Config file: /home/dev/workdir/minima/_config.yml
+            Source: /home/dev/workdir/minima
+       Destination: /home/dev/workdir/minima/_site
+ Incremental build: disabled. Enable with --incremental
+      Generating...
+       Jekyll Feed: Generating feed for posts
+                    done in 0.446 seconds.
+ Auto-regeneration: disabled. Use --watch to enable.
+dev@xela:~/workdir/minima$ ls -rd _site/
+_site/
+dev@xela:~/workdir/minima$
+</code></pre></div></div>
+<h1 id="view-the-site-in-your-browser">View the site in your browser.</h1>
+
+<p>If you use the “bundle exec jekyll serve -H 0.0.0.0” command shown above you should be able to see the site at port 4000 for any IP address the computer presents.   You can also serve the site with a server of your choice after running “bundle exec jekyll build” (also shown above).  The jekyll/minima site should look something like this:
+<img src="/assets/2024-09-06-jekyll-quickstart/jekyllminima.jpg" alt="your-image-description" style="border: 2px solid grey;" /></p>
+
+<h1 id="configure-as-needed">Configure as needed:</h1>
+
+<p>At this point you can modify the minima content to specify whatever website you want.  This is how the belug.us lookalike was created.  The details of how to do that are beyond the scope of this post.</p>]]></content><author><name></name></author><summary type="html"><![CDATA[In the Septemeber 5 meeting we did a walkthrough of how to build a simple website with jekyll. This post goes through that process. As a rough overview, the steps are: Update your computer with the necessary utilities (npm, node, some other npm related utilities). Clone the jekyll/minima repository. Prepare the minima repository with the necessary dependencies. Run jekyll to either serve or build the site.]]></summary></entry><entry><title type="html">Meeting on September 5</title><link href="/2024/09/06/meeting-on-september-5.html" rel="alternate" type="text/html" title="Meeting on September 5" /><published>2024-09-06T14:02:53-07:00</published><updated>2024-09-06T14:02:53-07:00</updated><id>/2024/09/06/meeting-on-september-5</id><content type="html" xml:base="/2024/09/06/meeting-on-september-5.html"><![CDATA[<h1 id="overview">Overview</h1>
+<p>The group met on zoom. Six people attended.</p>
+
+<h1 id="topics-discussed">Topics Discussed</h1>
+
+<ul>
+  <li><a href="https://ipv6.rs/">IPv6rs</a></li>
+  <li><a href="https://github.com/mudler/LocalAI">LocalAI</a> and <a href="https://apps.nextcloud.com/apps/integration_openai">self-hosted AI with Nextcloud integration</a></li>
+  <li><a href="https://actualbudget.com/">Actual Budget</a></li>
+  <li><a href="https://openai.com/index/whisper/">whisper voice to text</a></li>
+  <li><a href="https://github.com/instructlab">Instructlab (local AI chatbot)</a></li>
+  <li><a href="https://www.nomic.ai/gpt4all">gpt4all (another local AI tool)</a></li>
+  <li><a href="https://opentofu.org/">opentofu</a></li>
+  <li><a href="https://developer.hashicorp.com/terraform/language/state/workspaces">Terraform Workspaces</a></li>
+  <li><a href="https://jekyllrb.com/">jekyll</a> build walkthrough</li>
+</ul>]]></content><author><name></name></author><summary type="html"><![CDATA[Overview The group met on zoom. Six people attended.]]></summary></entry></feed>

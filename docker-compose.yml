@@ -1,0 +1,10 @@
+services:
+    web:
+      stdin_open: true # docker run -i
+      tty: true        # docker run -t
+      build: .
+      ports:
+        - "4000:4000"
+      volumes:
+        - .:/site
+      working_dir: /site

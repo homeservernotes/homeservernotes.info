@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>Getting up to speed with pi-hole | Home Server Group</title>
+<meta name="generator" content="Jekyll v4.4.1" />
+<meta property="og:title" content="Getting up to speed with pi-hole" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="This is a step by step summary of what it was like to install and use pi-hole on a proxmox server serving a small home network." />
+<meta property="og:description" content="This is a step by step summary of what it was like to install and use pi-hole on a proxmox server serving a small home network." />
+<meta property="og:site_name" content="Home Server Group" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2024-10-19T18:56:34-07:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Getting up to speed with pi-hole" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","dateModified":"2024-10-19T18:56:34-07:00","datePublished":"2024-10-19T18:56:34-07:00","description":"This is a step by step summary of what it was like to install and use pi-hole on a proxmox server serving a small home network.","headline":"Getting up to speed with pi-hole","mainEntityOfPage":{"@type":"WebPage","@id":"/2024/10/19/getting-up-to-speed-with-pi-hole.html"},"url":"/2024/10/19/getting-up-to-speed-with-pi-hole.html"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@latest/css/all.min.css">
+  <link rel="stylesheet" href="/assets/css/style.css"><link type="application/atom+xml" rel="alternate" href="/feed.xml" title="Home Server Group" />
+</head>
+<body><header class="site-header">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">Home Server Group</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/about/">About</a></div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Getting up to speed with pi-hole</h1>
+    <p class="post-meta"><time class="dt-published" datetime="2024-10-19T18:56:34-07:00" itemprop="datePublished">
+        Oct 19, 2024
+      </time></p>
+  </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <p>This is a step by step summary of what it was like to install and use pi-hole on a proxmox server serving a small home network.</p>
+
+<h2 id="install-in-proxmox-container">Install in proxmox container</h2>
+
+<ul>
+  <li>Created a new container
+    <ul>
+      <li>Static IP ( 192.168.8.141 )</li>
+      <li>2 cpus (may not have been necessary)</li>
+      <li>default settings otherwise</li>
+    </ul>
+  </li>
+  <li>Started new container</li>
+  <li>Used apt update &amp; apt upgrade to bring up to date</li>
+  <li>Used apt to install curl</li>
+  <li>Used curl to install pi-hole per <a href="https://github.com/pi-hole/pi-hole/#one-step-automated-install">instructions on site</a></li>
+  <li>Take note of pi-hole password.</li>
+  <li>Used ps to verify that pi-hole is running:</li>
+</ul>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>root@pihole2:~# ps -ef | grep pi
+message+     102       1  0 01:45 ?        00:00:00 @dbus-daemon --system --address=systemd: --nofork --nopidfile --systemd-activation --syslog-only
+pihole       158       1  0 01:45 ?        00:00:01 /usr/bin/pihole-FTL -f
+postfix      331     326  0 01:45 ?        00:00:00 pickup -l -t unix -u -c
+root         547     537  0 02:05 pts/1    00:00:00 grep --color=auto pi
+root@pihole2:~# 
+</code></pre></div></div>
+<ul>
+  <li>Reboot container and use ps again to verify automatic starting.</li>
+</ul>
+
+<h2 id="try-it-out-from-a-client-computer">Try it out from a client computer.</h2>
+
+<ul>
+  <li>
+    <p>Specify the pi-hole as DNS server by IP address.  Windows example shown below.
+<img src="/assets/2024-10-20__getting-up-to-speed-with-pi-hole/wireless_ip_settings_for_pihole.jpg" alt="your-image-description" style="border: 2px solid grey;" /></p>
+  </li>
+  <li>Make sure web browsing still works.</li>
+  <li>Access pi-hole control through browser : <code class="language-plaintext highlighter-rouge">https://192.168.8.141/admin</code></li>
+  <li>Use browser interface to disable/enable blocking.   Try browsing both ways.</li>
+</ul>
+
+<h2 id="eliminate-the-middleman-try-pi-hole-with-a-recursive-dns-server">Eliminate the middleman! Try pi-hole with a recursive DNS server.</h2>
+
+<ul>
+  <li>Per <a href="https://docs.pi-hole.net/guides/dns/unbound/">these instructions</a>, install and configure unbound.</li>
+</ul>
+
+<p>(install)</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>root@pihole2:~# apt install unbound
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+The following NEW packages will be installed:
+  unbound
+0 upgraded, 1 newly installed, 0 to remove and 0 not upgraded.
+</code></pre></div></div>
+<p>(and configure)</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>root@pihole2:~# cd /etc/unbound/unbound.conf.d/
+root@pihole2:/etc/unbound/unbound.conf.d# ls
+root-auto-trust-anchor-file.conf
+root@pihole2:/etc/unbound/unbound.conf.d# cat &gt; pi-hole.conf
+server:
+    # If no logfile is specified, syslog is used
+    # logfile: "/var/log/unbound/unbound.log"
+    verbosity: 0
+
+    interface: 127.0.0.1
+    port: 5335
+    do-ip4: yes
+    do-udp: yes
+    do-tcp: yes
+
+    # May be set to yes if you have IPv6 connectivity
+    do-ip6: no
+
+    # You want to leave this to no unless you have *native* IPv6. With 6to4 and
+    # Terredo tunnels your web browser should favor IPv4 for the same reasons
+    prefer-ip6: no
+
+    # Use this only when you downloaded the list of primary root servers!
+    # If you use the default dns-root-data package, unbound will find it automatically
+    #root-hints: "/var/lib/unbound/root.hints"
+
+    # Trust glue only if it is within the server's authority
+    harden-glue: yes
+
+    # Require DNSSEC data for trust-anchored zones, if such data is absent, the zone becomes BOGUS
+    harden-dnssec-stripped: yes
+
+    # Don't use Capitalization randomization as it known to cause DNSSEC issues sometimes
+    # see https://discourse.pi-hole.net/t/unbound-stubby-or-dnscrypt-proxy/9378 for further details
+    use-caps-for-id: no
+
+    # Reduce EDNS reassembly buffer size.
+    # IP fragmentation is unreliable on the Internet today, and can cause
+    # transmission failures when large DNS messages are sent via UDP. Even
+    # when fragmentation does work, it may not be secure; it is theoretically
+    # possible to spoof parts of a fragmented DNS message, without easy
+    # detection at the receiving end. Recently, there was an excellent study
+    # &gt;&gt;&gt; Defragmenting DNS - Determining the optimal maximum UDP response size for DNS &lt;&lt;&lt;
+    # by Axel Koolhaas, and Tjeerd Slokker (https://indico.dns-oarc.net/event/36/contributions/776/)
+    # in collaboration with NLnet Labs explored DNS using real world data from the
+    # the RIPE Atlas probes and the researchers suggested different values for
+    # IPv4 and IPv6 and in different scenarios. They advise that servers should
+    # be configured to limit DNS messages sent over UDP to a size that will not
+    # trigger fragmentation on typical network links. DNS servers can switch
+    # from UDP to TCP when a DNS response is too big to fit in this limited
+    # buffer size. This value has also been suggested in DNS Flag Day 2020.
+    edns-buffer-size: 1232
+
+    # Perform prefetching of close to expired message cache entries
+    # This only applies to domains that have been frequently queried
+    prefetch: yes
+
+    # One thread should be sufficient, can be increased on beefy machines. In reality for most users running on small networks or on a single machine, it should be unnecessary to seek performance enhancement by increasing num-threads above 1.
+    num-threads: 1
+
+    # Ensure kernel buffer is large enough to not lose messages in traffic spikes
+    so-rcvbuf: 1m
+
+    # Ensure privacy of local IP ranges
+    private-address: 192.168.0.0/16
+    private-address: 169.254.0.0/16
+    private-address: 172.16.0.0/12
+    private-address: 10.0.0.0/8
+    private-address: fd00::/8
+    private-address: fe80::/10
+root@pihole2:/etc/unbound/unbound.conf.d# ls
+pi-hole.conf  root-auto-trust-anchor-file.conf
+root@pihole2:/etc/unbound/unbound.conf.d# 
+</code></pre></div></div>
+
+<ul>
+  <li>Start and test the recursive server (“unbound”).</li>
+</ul>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>root@pihole2:/etc/unbound/unbound.conf.d# ps -ef  | grep unb
+root        8070     537  0 20:54 pts/1    00:00:00 grep --color=auto unb
+root@pihole2:/etc/unbound/unbound.conf.d# service unbound restart
+root@pihole2:/etc/unbound/unbound.conf.d# ps -ef  | grep unb
+unbound     8091       1  0 20:56 ?        00:00:00 /usr/sbin/unbound -d -p
+root        8093     537  0 20:56 pts/1    00:00:00 grep --color=auto unb
+root@pihole2:/etc/unbound/unbound.conf.d# dig pi-hole.net @127.0.0.1 -p 5335
+
+; &lt;&lt;&gt;&gt; DiG 9.18.28-0ubuntu0.22.04.1-Ubuntu &lt;&lt;&gt;&gt; pi-hole.net @127.0.0.1 -p 5335
+;; global options: +cmd
+;; Got answer:
+;; -&gt;&gt;HEADER&lt;&lt;- opcode: QUERY, status: NOERROR, id: 55935
+;; flags: qr rd ra; QUERY: 1, ANSWER: 1, AUTHORITY: 0, ADDITIONAL: 1
+
+;; OPT PSEUDOSECTION:
+; EDNS: version: 0, flags:; udp: 1232
+;; QUESTION SECTION:
+;pi-hole.net.                   IN      A
+
+;; ANSWER SECTION:
+pi-hole.net.            300     IN      A       3.18.136.52
+
+;; Query time: 146 msec
+;; SERVER: 127.0.0.1#5335(127.0.0.1) (UDP)
+;; WHEN: Sun Oct 20 20:56:32 UTC 2024
+;; MSG SIZE  rcvd: 56
+
+root@pihole2:/etc/unbound/unbound.conf.d# 
+</code></pre></div></div>
+
+<ul>
+  <li>Per <a href="https://docs.pi-hole.net/guides/dns/unbound/">same instructions</a>, set edns-packet-max .  It’s not clear (to me at least) why.
+    <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>root@pihole2:/etc/unbound/unbound.conf.d# ls /etc/dnsmasq.d              
+01-pihole.conf  06-rfc6761.conf
+root@pihole2:/etc/unbound/unbound.conf.d# cat &gt; /etc/dnsmasq.d/99-edns.conf
+edns-packet-max=1232
+root@pihole2:/etc/unbound/unbound.conf.d#    
+</code></pre></div>    </div>
+  </li>
+  <li>
+    <p>Per <a href="https://docs.pi-hole.net/guides/dns/unbound/">same instructions</a>, use browser interface to configure pi-hole to use “unbound” as recursive dns server.</p>
+  </li>
+  <li>
+    <p>Browse web from client to test.</p>
+  </li>
+  <li>Reboot proxmox container to make sure that pi-hole and unbound both start up automatically.</li>
+</ul>
+
+<h2 id="try-pi-hole-for-the-rest-of-the-network">Try pi-hole for the rest of the network.</h2>
+
+<ul>
+  <li>Log in to your router and configure DNS for the LAN to use the pi-hole.</li>
+  <li>
+    <p>NOTE: With this change in place, DNS queries still go the the router by default but then get forwarded to the pi-hole DNS server.
+<img src="/assets/2024-10-20__getting-up-to-speed-with-pi-hole//router_settings_for_pihole.jpg" alt="your-image-description" style="border: 2px solid grey;" /></p>
+  </li>
+  <li>Test multiple clients, with and without ad blocking, to make sure the internet is still accessible.</li>
+</ul>
+
+<h2 id="how-well-does-it-work">How well does it work?</h2>
+
+<ul>
+  <li>The Good
+    <ul>
+      <li>Chrome &amp; firefox browsers on computer, phone, tablet:  ads blocked.</li>
+      <li>Pinterest app on android tablet: ads blocked.</li>
+      <li>Youtube app on android tablet: ads blocked.</li>
+      <li>Youtube (streaming video with ads) on roku:   many but not all ads blocked.</li>
+    </ul>
+  </li>
+  <li>The Bad
+    <ul>
+      <li>Some videos on cnn.com no longer play with ad blocking enabled.</li>
+    </ul>
+  </li>
+  <li>The Disappointing
+    <ul>
+      <li>Prime video (streaming video with ads) on roku:   ads appear as before.</li>
+      <li>Tubi (streaming video with ads) on roku:   ads appear as before.</li>
+    </ul>
+  </li>
+</ul>
+
+  </div><a class="u-url" href="/2024/10/19/getting-up-to-speed-with-pi-hole.html" hidden></a>
+</article>
+
+      </div>
+    </main>
+
+    <div class="page-content">
+      <div class="wrapper">
+        
+    
+<div id="gh-comments">
+    <br/><br/>
+    <h6>COMMENTS</h6>
+    <div id="gh-comments-list"></div>
+</div>
+
+<script src="/js/github-comments.js"> </script>
+
+<script type="text/javascript"> 
+    DoGithubComments ( 
+        "homeservernotes/homeservernotes.info" , 
+        "50" 
+    ); 
+</script>
+
+<noscript>Please enable JavaScript to view comments.</noscript>
+
+
+
+      </div>
+    </div><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col">
+        <p class="feed-subscribe">
+          <a href="/feed.xml">
+            <svg class="svg-icon orange">
+              <path d="M12.8 16C12.8 8.978 7.022 3.2 0 3.2V0c8.777 0 16 7.223 16 16h-3.2zM2.194
+                11.61c1.21 0 2.195.985 2.195 2.196 0 1.21-.99 2.194-2.2 2.194C.98 16 0 15.017 0
+                13.806c0-1.21.983-2.195 2.194-2.195zM10.606
+                16h-3.11c0-4.113-3.383-7.497-7.496-7.497v-3.11c5.818 0 10.606 4.79 10.606 10.607z"
+              />
+            </svg><span>Subscribe</span>
+          </a>
+        </p>
+      </div>
+      <div class="footer-col">
+        <p></p>
+      </div>
+    </div>
+
+    <div class="social-links"><ul class="social-media-list"></ul>
+</div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>

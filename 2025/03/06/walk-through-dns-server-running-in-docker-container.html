@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>walk-through: DNS server running in docker container | Home Server Group</title>
+<meta name="generator" content="Jekyll v4.4.1" />
+<meta property="og:title" content="walk-through: DNS server running in docker container" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Overview" />
+<meta property="og:description" content="Overview" />
+<meta property="og:site_name" content="Home Server Group" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2025-03-06T12:58:27-08:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="walk-through: DNS server running in docker container" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","dateModified":"2025-03-06T12:58:27-08:00","datePublished":"2025-03-06T12:58:27-08:00","description":"Overview","headline":"walk-through: DNS server running in docker container","mainEntityOfPage":{"@type":"WebPage","@id":"/2025/03/06/walk-through-dns-server-running-in-docker-container.html"},"url":"/2025/03/06/walk-through-dns-server-running-in-docker-container.html"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@latest/css/all.min.css">
+  <link rel="stylesheet" href="/assets/css/style.css"><link type="application/atom+xml" rel="alternate" href="/feed.xml" title="Home Server Group" />
+</head>
+<body><header class="site-header">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">Home Server Group</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/about/">About</a></div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">walk-through: DNS server running in docker container</h1>
+    <p class="post-meta"><time class="dt-published" datetime="2025-03-06T12:58:27-08:00" itemprop="datePublished">
+        Mar 6, 2025
+      </time></p>
+  </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <h2 id="overview">Overview</h2>
+
+<p>This post will demonstrate a simple but useful example of a container.</p>
+
+<h2 id="motivation">Motivation</h2>
+
+<p><a href="https://changelog.com/podcast/581">Episode 581 of the changelog podcast</a>, features an interview with <a href="https://en.wikipedia.org/wiki/Paul_Vixie">Paul Vixie</a>, a contributor to both <a href="https://www.internethalloffame.org/inductee/paul-vixie/">the design and implementation of several DNS protocol extensions</a>.  In this interview, Vixie advocates running and using a DNS server locally on your personal computer:</p>
+
+<p><img src="/assets/2025-03-06-walk-through--dns-server-running-in-docker-container/vixieQuote.jpg" alt="your-image-description" style="border: 2px solid grey;" /></p>
+
+<p>This post goes through the process of using <a href="https://docker.com">Docker</a> to build an image that contains the <a href="https://www.nlnetlabs.nl/projects/unbound/about/">unbound dns server</a> built from source and run that image as a background process on your local machine.</p>
+
+<h2 id="setting-up">Setting up</h2>
+
+<p>First, install <a href="https://docker.com">docker</a> and <a href="https://docs.docker.com/compose/">docker compose</a> on your computer.  This walk-through uses <a href="https://git-scm.com/">git</a> too so install that if necessary.   For example, on Ubuntu, use apt:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>hs@vbox:~$ sudo apt install docker.io docker-compose-v2 git -y
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+... lots of output removed ...
+hs@vbox:~$
+</code></pre></div></div>
+
+<h2 id="get-the-related-source-files-from-github">Get the related source files from github:</h2>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>hs@vbox:~$ git clone https://github.com/homeserversample/docker-unbound-source.git
+Cloning into 'docker-unbound-source'...
+remote: Enumerating objects: 44, done.
+remote: Counting objects: 100% (44/44), done.
+remote: Compressing objects: 100% (31/31), done.
+remote: Total 44 (delta 14), reused 39 (delta 9), pack-reused 0 (from 0)
+Receiving objects: 100% (44/44), 6.25 KiB | 2.08 MiB/s, done.
+Resolving deltas: 100% (14/14), done.
+hs@vbox:~$
+
+</code></pre></div></div>
+
+<p>This repository includes:</p>
+<ul>
+  <li>A Dockerfile file which specifies how to build the image from source.</li>
+  <li>A docker-compose.yaml file which specifies how to run the image.</li>
+  <li>A localhost.conf file that specifies the configuration for unbound.</li>
+  <li>An empty unbound.log file which unbound will write logging output to.</li>
+</ul>
+
+<p>Note that the docker compose file contains the following line:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    build: .
+</code></pre></div></div>
+
+<p>This line directs docker compose to build the image based on the Dockerfile in the current directory if the image does not already exist.</p>
+
+<h2 id="start-the-unbound-server">Start the unbound server.</h2>
+
+<p>In the “docker-unbound-source” repo, type <code class="language-plaintext highlighter-rouge">sudo docker compose up</code>.   This will run unbound inside a container per the specifications in docker-compose.yaml.   If needed (the first time only), docker will build the image per the specifications in Dockerfile.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>hs@vbox:~$ cd docker-unbound-source/
+hs@vbox:~/docker-unbound-source$ sudo docker compose up
+[+] Building 128.4s (16/19)                                                                                                                                          docker:default
+ =&gt; [unbound internal] load build definition from Dockerfile                                                                                                                   0.0s
+ =&gt; =&gt; transferring dockerfile: 664B                                                                                                                                           0.0s
+ =&gt; [unbound internal] load metadata for docker.io/library/ubuntu:latest                                                                                                       1.2s
+ =&gt; [unbound internal] load .dockerignore                                                                                                                                      0.0s
+ =&gt; =&gt; transferring context: 2B                                                                                                                                                0.0s
+ =&gt; [unbound  1/16] FROM docker.io/library/ubuntu:latest@sha256:72297848456d5d37d1262630108ab308d3e9ec7ed1c3286a32fe09856619a782                                               2.4s
+
+...deleted lengthy transcript...
+
+ =&gt; =&gt; writing image sha256:06bafa09419dc2324070786743d42435fe75c6eec9d82faf9bc6df9ddfbdb876                                                                                   0.0s
+ =&gt; =&gt; naming to docker.io/library/docker-unbound-source-unbound                                                                                                               0.0s
+[+] Running 1/1
+ ✔ Container docker-unbound-source-unbound-1  Created                                                                                                                          0.2s
+Attaching to unbound-1
+
+</code></pre></div></div>
+
+<h1 id="take-note-of-running-docker-container">Take note of running docker container.</h1>
+
+<p>At this point the unbound DNS server should be running in a docker container on your system.   In a new window, use <code class="language-plaintext highlighter-rouge">sudo docker ps</code> to list the running containers:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>hs@vbox:~$ sudo docker ps
+CONTAINER ID   IMAGE                           COMMAND                  CREATED         STATUS         PORTS     NAMES
+9dfb2d3cf895   docker-unbound-source-unbound   "unbound -d -c /conf…"   7 minutes ago   Up 7 minutes             docker-unbound-source-unbound-1
+hs@vbox:~$
+</code></pre></div></div>
+
+<h2 id="use-dig-to-test-the-dns-server">Use dig to test the DNS server</h2>
+
+<p>Unbound should be listening for DNS queries on the localhost network interface for the computer that it is running on.  Use dig (in a new terminal) to verify this:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>hs@vbox:~$
+hs@vbox:~$ dig @127.0.0.1 google.com
+
+; &lt;&lt;&gt;&gt; DiG 9.18.30-0ubuntu0.24.04.2-Ubuntu &lt;&lt;&gt;&gt; @127.0.0.1 google.com
+; (1 server found)
+;; global options: +cmd
+;; Got answer:
+;; -&gt;&gt;HEADER&lt;&lt;- opcode: QUERY, status: NOERROR, id: 43916
+;; flags: qr rd ra; QUERY: 1, ANSWER: 1, AUTHORITY: 0, ADDITIONAL: 1
+
+;; OPT PSEUDOSECTION:
+; EDNS: version: 0, flags:; udp: 1232
+;; QUESTION SECTION:
+;google.com.                    IN      A
+
+;; ANSWER SECTION:
+google.com.             267     IN      A       142.251.211.238
+
+;; Query time: 1 msec
+;; SERVER: 127.0.0.1#53(127.0.0.1) (UDP)
+;; WHEN: Fri Feb 28 15:37:37 PST 2025
+;; MSG SIZE  rcvd: 55
+
+hs@vbox:~$
+</code></pre></div></div>
+
+<p>Note that the SERVER is reported to be 127.0.0.1#53.   This is the address/port that the unbound server listens on.</p>
+
+<h2 id="make-localhost-the-default-dns-server">Make localhost the default DNS server</h2>
+
+<p>At this point, unbound is running and responding to local DNS queries but is not (yet) the default DNS service for this computer.  If you use dig <em>without</em> specifying a server to use you can see that the default server is not 127.0.0.1:53 .   In my case it is 127.0.0.53:53 :</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>hs@vbox:~$ dig google.com
+
+; &lt;&lt;&gt;&gt; DiG 9.18.30-0ubuntu0.24.04.2-Ubuntu &lt;&lt;&gt;&gt; google.com
+;; global options: +cmd
+;; Got answer:
+;; -&gt;&gt;HEADER&lt;&lt;- opcode: QUERY, status: NOERROR, id: 11243
+;; flags: qr rd ra; QUERY: 1, ANSWER: 1, AUTHORITY: 0, ADDITIONAL: 1
+
+;; OPT PSEUDOSECTION:
+; EDNS: version: 0, flags:; udp: 65494
+;; QUESTION SECTION:
+;google.com.                    IN      A
+
+;; ANSWER SECTION:
+google.com.             85      IN      A       142.251.211.238
+
+;; Query time: 8 msec
+;; SERVER: 127.0.0.53#53(127.0.0.53) (UDP)
+;; WHEN: Fri Feb 28 15:57:05 PST 2025
+;; MSG SIZE  rcvd: 55
+
+hs@vbox:~$
+
+</code></pre></div></div>
+
+<p>How to change the default DNS server will vary from one machine to another.   On a Ubuntu 24.04 computer I deleted the existing /etc/resolv.conf link and recreated /etc/resolve.conf as a file specifying 127.0.0.1 as my DNS server with 1.1.1.1 as an alternate server in case something goes wrong with the containerized unbound:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>hs@vbox:~$ cd /etc
+hs@vbox:/etc$ ls -la resolv.conf
+lrwxrwxrwx 1 root root 39 Apr 24  2024 resolv.conf -&gt; ../run/systemd/resolve/stub-resolv.conf
+hs@vbox:/etc$ sudo su
+root@vbox:/etc# cp resolv.conf  resolv.conf.sav
+root@vbox:/etc# rm resolv.conf
+root@vbox:/etc# cat &gt; resolv.conf &lt;&lt; DONE
+&gt; nameserver 127.0.0.1
+nameserer 1.1.1.1
+options edns0 trust-ad
+search lan
+DONE
+root@vbox:/etc#
+root@vbox:/etc#
+root@vbox:/etc# exit
+exit
+hs@vbox:/etc$
+hs@vbox:/etc$ cat resolv.conf
+nameserver 127.0.0.1
+nameserer 1.1.1.1
+options edns0 trust-ad
+search lan
+hs@vbox:/etc$
+</code></pre></div></div>
+
+<h2 id="use-dig-again-to-verify-that-the-default-server-is-now-localhost">Use dig again to verify that the default server is now localhost:</h2>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>hs@vbox:/etc$ dig google.com
+
+; &lt;&lt;&gt;&gt; DiG 9.18.30-0ubuntu0.24.04.2-Ubuntu &lt;&lt;&gt;&gt; google.com
+;; global options: +cmd
+;; Got answer:
+;; -&gt;&gt;HEADER&lt;&lt;- opcode: QUERY, status: NOERROR, id: 16543
+;; flags: qr rd ra; QUERY: 1, ANSWER: 1, AUTHORITY: 0, ADDITIONAL: 1
+
+;; OPT PSEUDOSECTION:
+; EDNS: version: 0, flags:; udp: 1232
+;; QUESTION SECTION:
+;google.com.                    IN      A
+
+;; ANSWER SECTION:
+google.com.             300     IN      A       142.251.211.238
+
+;; Query time: 14 msec
+;; SERVER: 127.0.0.1#53(127.0.0.1) (UDP)
+;; WHEN: Fri Feb 28 16:09:35 PST 2025
+;; MSG SIZE  rcvd: 55
+
+</code></pre></div></div>
+
+<h2 id="running-the-containerized-unbound-as-a-background-service">Running the containerized unbound as a background service</h2>
+
+<p>If the unbound server is still running, you can close it gracefully with a ctrl-c in the terminal that it is running in:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[+] Running 1/1
+ ✔ Container docker-unbound-source-unbound-1  Created                                                                                                   0.1s
+Attaching to unbound-1
+^CGracefully stopping... (press Ctrl+C again to force)
+[+] Stopping 1/0
+ ✔ Container docker-unbound-source-unbound-1  Stopped                                                                                                                          0.1s
+canceled
+hs@vbox:~/docker-unbound-source$
+
+</code></pre></div></div>
+
+<p>If you like, you can use dig again to verify that the server is no longer functioning:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>hs@vbox:/etc$ dig google.com
+;; communications error to 127.0.0.1#53: connection refused
+;; communications error to 127.0.0.1#53: connection refused
+;; communications error to 127.0.0.1#53: connection refused
+
+; &lt;&lt;&gt;&gt; DiG 9.18.30-0ubuntu0.24.04.2-Ubuntu &lt;&lt;&gt;&gt; google.com
+;; global options: +cmd
+;; no servers could be reached
+hs@vbox:/etc$ cat resolv.conf
+nameserver 127.0.0.1
+nameserer 1.1.1.1
+options edns0 trust-ad
+search lan
+hs@vbox:/etc$
+</code></pre></div></div>
+
+<p>Note that my backup server didn’t run either due to a typo in <code class="language-plaintext highlighter-rouge">/etc/resolv.conf</code> ( “nameserver” spelled wrong on second line ).</p>
+
+<p>After fixing the typo <code class="language-plaintext highlighter-rouge">dig google.com</code> uses the 1.1.1.1 DNS server and gives the expected result:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>hs@vbox:/etc$ dig google.com
+;; communications error to 127.0.0.1#53: connection refused
+;; communications error to 127.0.0.1#53: connection refused
+;; communications error to 127.0.0.1#53: connection refused
+
+; &lt;&lt;&gt;&gt; DiG 9.18.30-0ubuntu0.24.04.2-Ubuntu &lt;&lt;&gt;&gt; google.com
+;; global options: +cmd
+;; Got answer:
+;; -&gt;&gt;HEADER&lt;&lt;- opcode: QUERY, status: NOERROR, id: 63053
+;; flags: qr rd ra; QUERY: 1, ANSWER: 1, AUTHORITY: 0, ADDITIONAL: 1
+
+;; OPT PSEUDOSECTION:
+; EDNS: version: 0, flags:; udp: 1232
+;; QUESTION SECTION:
+;google.com.                    IN      A
+
+;; ANSWER SECTION:
+google.com.             107     IN      A       142.251.33.78
+
+;; Query time: 27 msec
+;; SERVER: 1.1.1.1#53(1.1.1.1) (UDP)
+;; WHEN: Fri Feb 28 16:22:14 PST 2025
+;; MSG SIZE  rcvd: 55
+
+hs@vbox:/etc$
+</code></pre></div></div>
+<p>To run the containerized unbound DNS server as a background sevice, add a <code class="language-plaintext highlighter-rouge">-d</code> argument to the <code class="language-plaintext highlighter-rouge">docker compose up</code> command used earlier:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>hs@vbox:~/docker-unbound-source$ sudo docker compose up -d
+[+] Running 1/1
+ ✔ Container docker-unbound-source-unbound-1  Started                                                                                                                          0.2s
+hs@vbox:~/docker-unbound-source$
+hs@vbox:~/docker-unbound-source$ sudo docker ps
+CONTAINER ID   IMAGE                           COMMAND                  CREATED          STATUS          PORTS     NAMES
+bce4cc48eb8a   docker-unbound-source-unbound   "unbound -d -c /conf…"   50 minutes ago   Up 23 seconds             docker-unbound-source-unbound-1
+hs@vbox:~/docker-unbound-source$
+</code></pre></div></div>
+
+<p>Note the use of <code class="language-plaintext highlighter-rouge">docker ps</code> to verify that the container is running.</p>
+
+<p>You can use dig again (not shown here) to verify that unbound is functioning.</p>
+
+<p>At this point, the docker system should restart the containerized unbound automatically after a reboot.</p>
+
+<p>To shutdown the container, use <code class="language-plaintext highlighter-rouge">docker compose down</code> in the same directory as the docker-compose.yaml file:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>hs@vbox:~$ pwd
+/home/hs
+hs@vbox:~$ cd docker-unbound-source/
+hs@vbox:~/docker-unbound-source$ ls
+conf  docker-compose.yaml  Dockerfile  log
+hs@vbox:~/docker-unbound-source$ sudo docker compose down
+[+] Running 1/1
+ ✔ Container docker-unbound-source-unbound-1  Removed                                                                                                                          0.1s
+hs@vbox:~/docker-unbound-source$
+hs@vbox:~/docker-unbound-source$
+hs@vbox:~/docker-unbound-source$ sudo docker ps
+CONTAINER ID   IMAGE     COMMAND   CREATED   STATUS    PORTS     NAMES
+hs@vbox:~/docker-unbound-source$
+hs@vbox:~/docker-unbound-source$
+</code></pre></div></div>
+
+<p>Note the use of <code class="language-plaintext highlighter-rouge">docker ps</code> to verify that the container is no longer running.</p>
+
+<p>Use <code class="language-plaintext highlighter-rouge">docker compose up -d</code> to start the containerized unbound server back up.</p>
+
+<p>At this point you can leave the unbound server running to “listen on the loopback address” for DNS queries (as Paul Vixie suggested) or restore the computer to the original settings:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>hs@vbox:~$ cd /etc
+hs@vbox:/etc$ sudo su
+root@vbox:/etc# cp resolv.conf resolv.conf.save2
+root@vbox:/etc# ln -s ../run/systemd/resolve/stub-resolv.conf resolv.conf
+ln: failed to create symbolic link 'resolv.conf': File exists
+root@vbox:/etc# rm resolv.conf
+root@vbox:/etc# ln -s ../run/systemd/resolve/stub-resolv.conf resolv.conf
+root@vbox:/etc# diff resolv.conf resolv.conf.save
+root@vbox:/etc#
+exit
+hs@vbox:/etc$ dig google.com
+
+; &lt;&lt;&gt;&gt; DiG 9.18.30-0ubuntu0.24.04.2-Ubuntu &lt;&lt;&gt;&gt; google.com
+;; global options: +cmd
+;; Got answer:
+;; -&gt;&gt;HEADER&lt;&lt;- opcode: QUERY, status: NOERROR, id: 47738
+;; flags: qr rd ra; QUERY: 1, ANSWER: 1, AUTHORITY: 0, ADDITIONAL: 1
+
+;; OPT PSEUDOSECTION:
+; EDNS: version: 0, flags:; udp: 65494
+;; QUESTION SECTION:
+;google.com.                    IN      A
+
+;; ANSWER SECTION:
+google.com.             63      IN      A       142.250.217.78
+
+;; Query time: 8 msec
+;; SERVER: 127.0.0.53#53(127.0.0.53) (UDP)
+;; WHEN: Fri Feb 28 16:44:46 PST 2025
+;; MSG SIZE  rcvd: 55
+
+hs@vbox:/etc$
+
+</code></pre></div></div>
+
+<p>Note the use of dig again to confirm that the original settings have been successfully restored.</p>
+
+  </div><a class="u-url" href="/2025/03/06/walk-through-dns-server-running-in-docker-container.html" hidden></a>
+</article>
+
+      </div>
+    </main>
+
+    <div class="page-content">
+      <div class="wrapper">
+        
+    
+<div id="gh-comments">
+    <br/><br/>
+    <h6>COMMENTS</h6>
+    <div id="gh-comments-list"></div>
+</div>
+
+<script src="/js/github-comments.js"> </script>
+
+<script type="text/javascript"> 
+    DoGithubComments ( 
+        "homeservernotes/homeservernotes.info" , 
+        "62" 
+    ); 
+</script>
+
+<noscript>Please enable JavaScript to view comments.</noscript>
+
+
+
+      </div>
+    </div><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col">
+        <p class="feed-subscribe">
+          <a href="/feed.xml">
+            <svg class="svg-icon orange">
+              <path d="M12.8 16C12.8 8.978 7.022 3.2 0 3.2V0c8.777 0 16 7.223 16 16h-3.2zM2.194
+                11.61c1.21 0 2.195.985 2.195 2.196 0 1.21-.99 2.194-2.2 2.194C.98 16 0 15.017 0
+                13.806c0-1.21.983-2.195 2.194-2.195zM10.606
+                16h-3.11c0-4.113-3.383-7.497-7.496-7.497v-3.11c5.818 0 10.606 4.79 10.606 10.607z"
+              />
+            </svg><span>Subscribe</span>
+          </a>
+        </p>
+      </div>
+      <div class="footer-col">
+        <p></p>
+      </div>
+    </div>
+
+    <div class="social-links"><ul class="social-media-list"></ul>
+</div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>
