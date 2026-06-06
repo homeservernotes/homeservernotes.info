@@ -1,0 +1,35 @@
+---
+layout: post
+title: "Meeting on 2026-06-04"
+date: 2026-06-06 12:12:21 -0700
+published: true
+github_comments_issueid: "63"
+tags:
+---
+# Overview
+3 people attended.
+
+# Topics Discussed
+
+## Personal Location Tracking
+* [dawarich](https://dawarich.app/)
+* [colata](https://colota.app/)
+* [reiti](https://www.dedicatedcode.com/projects/reitti/latest/)
+
+## Hardware
+* [LattePanda IOTA Palm-sized x86 Single Board Computer](https://www.dfrobot.com/product-2989.html)
+* [ZimaBoard 2 Mini Nas Kit for Home Server & Personal Cloud](https://shop.zimaspace.com/collections/zima-master-kits/products/zimaboard-2-mini-nas-kit-for-home-server)
+* [goldenmate energy ups](https://goldenmateenergy.com/products/600va-360w-lifepo4-ups-wall-mount)
+
+## Reviews
+* [serve the home](https://www.servethehome.com/)
+* [Jeff Geerling](https://www.jeffgeerling.com/)
+
+## AI 
+* [Hermes Agent](https://hermes-agent.nousresearch.com/)
+
+## Services
+* [FileBrowser](https://filebrowser.org/)
+
+## Frameworks
+* [Baremetal vs Proxmox performance comparison](https://neil.computer/notes/baremetal-vs-proxmox-vs-esxi-performance-geekbench-scores/)
