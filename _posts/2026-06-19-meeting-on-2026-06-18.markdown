@@ -1,0 +1,31 @@
+---
+layout: post
+title: "Meeting on 2026-06-18"
+date: 2026-06-19 14:33:07 -0700
+published: true
+github_comments_issueid: "64"
+tags:
+---
+# Overview
+3 people attended.
+
+# Topics Discussed
+
+## AI
+* [hermes agent](https://hermes-agent.nousresearch.com/)
+* [openwebui.com](https://openwebui.com/)
+* [ollama](https://ollama.com/)
+
+## Vibe Coding a full Mikrotik network management platform using Claude AI: 
+* [Mikrotik](https://www.balticnetworks.com/collections/mikrotik-top-products?gad_source=1&gad_campaignid=23672835014&gclid=Cj0KCQjwrs7RBhDuARIsAIVfBD1ZSZlpvGtSuZPvXn9KSxEQ2oa24LIuhqby-CjgG2BuNy5ox1YE0XQaAqlcEALw_wcB)
+* [video](https://www.youtube.com/watch?v=NXUKyWIH90c)
+
+## Text to Speech Utilities (for meeting notes transcriptions)
+* [whisper.cpp](https://jitsi.support/developer/setup-jitsi-whispercpp-transcriptions/)
+
+## Home Lab Software
+* [Limine Bootloader](https://github.com/Limine-Bootloader/Limine)
+
+
+## Home Lab Hardware
+* [sierro home battery](https://www.kickstarter.com/projects/sierro/sierro-the-compact-home-backup-that-fits-anywhere)
