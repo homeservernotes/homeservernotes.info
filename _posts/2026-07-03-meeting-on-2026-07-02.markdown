@@ -1,0 +1,48 @@
+---
+layout: post
+title: "Meeting on 2026-07-02"
+date: 2026-07-03 11:00:47 -0700
+published: true
+github_comments_issueid: "65"
+tags:
+---
+
+# Overview
+4 people attended.
+
+# Topics Discussed
+
+## CI/CD Tools
+* [Flux CD project](https://github.com/fluxcd)
+* [Argo CD](https://argoproj.github.io/cd/)
+* [HELM (package manager)](https://helm.sh/)
+
+## Configuration Tools
+* [OpenTofu](https://opentofu.org/)
+* [Terraform](https://developer.hashicorp.com/terraform)
+
+## Authentication Tools
+* [KeyCloak (Open Source Identity and Access Management)](https://www.keycloak.org/)
+* [LDAP (Lightweight Directory Access Protocol)](https://ldap.com/)
+* [OpenLDAP](https://www.openldap.org/)
+* [FreeIPA (Identity and Authentication for Linux)](https://www.freeipa.org/)
+* [nsswitch.conf (configuration file)](https://www.man7.org/linux/man-pages/man5/nsswitch.conf.5.html)
+* [getent (command)](https://man7.org/linux/man-pages/man1/getent.1.html)
+
+## Source Code Hosting
+* [Forgejo (self-hosted lightweight software forge)](https://forgejo.org/)
+
+## Hardware
+* [ACEMAGIC M5 Mini PC](https://www.amazon.com/dp/B0GGZR42F5?ref=ppx_yo2ov_dt_b_fed_asin_title&th=1)
+* [ASRock AMD BC-250](https://www.tomshardware.com/video-games/pc-gaming/asrock-bc-250-used-for-steam-machine-duty-gains-third-party-hack-to-unlock-all-40-cus-mining-board-now-has-more-cus-than-a-base-ps5)
+
+## Misc Software
+* [top (process monitoring command)](https://man7.org/linux/man-pages/man1/top.1.html)
+* [btop (process monitoring command)](https://linuxcommandlibrary.com/man/btop)
+
+## Networking
+* [Tailscale Exit Node](https://tailscale.com/docs/features/exit-nodes)
+
+## AI Agents
+* [Hermes Agent](https://hermes-agent.org/)
+
