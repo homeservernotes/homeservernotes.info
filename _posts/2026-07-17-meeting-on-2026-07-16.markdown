@@ -1,0 +1,32 @@
+---
+layout: post
+title: "Meeting on 2026-07-16"
+date: 2026-07-17 10:55:14 -0700
+published: true
+github_comments_issueid: "66"
+tags:
+---
+
+# Overview
+3 people attended.
+
+# Topics Discussed
+
+## Configuration Tools
+* [Proxmox/Terraform Demo](https://github.com/dmbrownlee/demo-proxmox-terraform)
+
+## Personal Note Taking Tools
+* [Tiddlywiki](https://tiddlywiki.com/)
+* [Obsidian](https://obsidian.md/)
+
+## Universal Power Supply
+* [Goldenmate UPS](https://goldenmateenergy.com/collections/ups)
+* [Network UPS Tools (NUT)](https://networkupstools.org/)
+* [Jeff Geerling's NUT related blog post](https://www.jeffgeerling.com/blog/2025/nut-on-my-pi-so-my-servers-dont-die/)
+
+## Source Code Hosting
+* [Forgejo (self-hosted lightweight software forge)](https://forgejo.org/)
+
+## Meeting Notetaking Tools
+* [Meetily - An AI Meeting Assistant & Note Taker](https://meetily.ai/)
+
