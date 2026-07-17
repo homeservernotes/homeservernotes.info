@@ -9,16 +9,18 @@
 <meta property="og:locale" content="en_US" />
 <meta name="description" content="A proxmox server serves a browser based GUI for configuration. This gui is accessible on localhost:8006 but there’s no easy way to run a browser on the proxmox machine so we use tailscale to serve that port to a different machine. The tailscale setup process probably doesn’t justify a blog post but I’ll go through it here anyway. I’ll be using the Virtualbox proxmox instance that I created and wrote about a couple of days ago to demonstrate." />
 <meta property="og:description" content="A proxmox server serves a browser based GUI for configuration. This gui is accessible on localhost:8006 but there’s no easy way to run a browser on the proxmox machine so we use tailscale to serve that port to a different machine. The tailscale setup process probably doesn’t justify a blog post but I’ll go through it here anyway. I’ll be using the Virtualbox proxmox instance that I created and wrote about a couple of days ago to demonstrate." />
+<link rel="canonical" href="http://0.0.0.0:4000/2024/04/23/browser-access-to-proxmox-using-tailscale.html" />
+<meta property="og:url" content="http://0.0.0.0:4000/2024/04/23/browser-access-to-proxmox-using-tailscale.html" />
 <meta property="og:site_name" content="Home Server Group" />
 <meta property="og:type" content="article" />
 <meta property="article:published_time" content="2024-04-23T16:32:36-07:00" />
 <meta name="twitter:card" content="summary" />
 <meta property="twitter:title" content="Browser Access to Proxmox using Tailscale" />
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"BlogPosting","dateModified":"2024-04-23T16:32:36-07:00","datePublished":"2024-04-23T16:32:36-07:00","description":"A proxmox server serves a browser based GUI for configuration. This gui is accessible on localhost:8006 but there’s no easy way to run a browser on the proxmox machine so we use tailscale to serve that port to a different machine. The tailscale setup process probably doesn’t justify a blog post but I’ll go through it here anyway. I’ll be using the Virtualbox proxmox instance that I created and wrote about a couple of days ago to demonstrate.","headline":"Browser Access to Proxmox using Tailscale","mainEntityOfPage":{"@type":"WebPage","@id":"/2024/04/23/browser-access-to-proxmox-using-tailscale.html"},"url":"/2024/04/23/browser-access-to-proxmox-using-tailscale.html"}</script>
+{"@context":"https://schema.org","@type":"BlogPosting","dateModified":"2024-04-23T16:32:36-07:00","datePublished":"2024-04-23T16:32:36-07:00","description":"A proxmox server serves a browser based GUI for configuration. This gui is accessible on localhost:8006 but there’s no easy way to run a browser on the proxmox machine so we use tailscale to serve that port to a different machine. The tailscale setup process probably doesn’t justify a blog post but I’ll go through it here anyway. I’ll be using the Virtualbox proxmox instance that I created and wrote about a couple of days ago to demonstrate.","headline":"Browser Access to Proxmox using Tailscale","mainEntityOfPage":{"@type":"WebPage","@id":"http://0.0.0.0:4000/2024/04/23/browser-access-to-proxmox-using-tailscale.html"},"url":"http://0.0.0.0:4000/2024/04/23/browser-access-to-proxmox-using-tailscale.html"}</script>
 <!-- End Jekyll SEO tag -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@latest/css/all.min.css">
-  <link rel="stylesheet" href="/assets/css/style.css"><link type="application/atom+xml" rel="alternate" href="/feed.xml" title="Home Server Group" />
+  <link rel="stylesheet" href="/assets/css/style.css"><link type="application/atom+xml" rel="alternate" href="http://0.0.0.0:4000/feed.xml" title="Home Server Group" />
 </head>
 <body><header class="site-header">
 
@@ -138,7 +140,7 @@
     <div class="footer-col-wrapper">
       <div class="footer-col">
         <p class="feed-subscribe">
-          <a href="/feed.xml">
+          <a href="http://0.0.0.0:4000/feed.xml">
             <svg class="svg-icon orange">
               <path d="M12.8 16C12.8 8.978 7.022 3.2 0 3.2V0c8.777 0 16 7.223 16 16h-3.2zM2.194
                 11.61c1.21 0 2.195.985 2.195 2.196 0 1.21-.99 2.194-2.2 2.194C.98 16 0 15.017 0
